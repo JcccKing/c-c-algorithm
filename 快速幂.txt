@@ -1,0 +1,41 @@
+//算法笔记  快速幂
+
+#include<cstdio>
+typedef  long long LL;
+//最简单的 递归  
+LL llpow(LL a,LL b,LL m){
+	LL ans=1;
+	for(int i=0;i<b;i++){
+		ans =ans *a %m;
+	}
+	return ans;
+} 
+//二分法 快速幂
+LL binarypow(LL a,LL b,LL m){
+	if(b==0) return 1; 
+	if( b%2 ==1) return a * binarypow(a,b-1,m) % m;//  b%2 ==1用 b&1 更快
+	else {
+		LL mul = binarypow(a , b/2,m);
+		return mul *mul % m;
+	}
+} 
+//迭代法 快速幂
+LL res_pow(LL a,LL b,LL m){
+	LL ans =1;
+	while( b> 0){
+		if( b& 1){
+			ans =ans * a % m;
+		}
+		a = a * a % m;
+		b >>= 1;
+	}
+	return ans; 
+} 
+//给三个整数 a,b,m 求 a 的 b 次方 % m 
+int main(){
+	int n,a,b,c;
+	scanf("%d %d %d",&a,&b,&c);
+	LL x =llpow(a,b,c);
+	printf("%d\n",x);
+	return 0;
+}
