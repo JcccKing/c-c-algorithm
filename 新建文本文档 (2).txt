@@ -1,0 +1,54 @@
+#include<cstdio>
+//二分查找  算法笔记 例子
+const int n=10;
+int binaryserach(int a[],int left,int right,int x){
+	int mid;
+	while(left <= right){
+		mid=(left+right)/2;
+		if(a[mid] == x) return mid;
+		else if( a[mid]< x) left =mid+1;
+		else right =mid-1;
+	}
+	return -1;
+}
+int main(){
+	int a[n]={1,3,4,6,7,8,10,11,12,15};
+	int m;
+	while( scanf("%d",&m) !=EOF){
+		int x=binaryserach(a ,0,n-1,m);
+		printf("%d\n",x);
+	} 
+
+	return 0;
+} 
+
+算法笔记 装水问题
+#include<cstdio>
+#include<cmath>
+const double PI =acos(-1.0);
+const double eps = 1e-5;//精度
+double f( double R,double h){
+	double alpha = 2* acos( (R-h) /R);
+	double L = 2*sqrt(R *R -(R-h) *(R-h));
+	double S1 = alpha  *R *R/2 - L*(R- h)/2;
+	double S2 = PI *R *R/2;
+	return S1/S2;
+} 
+double solve( double R,double r){
+	double left =0,right =R,mid;
+	while( right - left >eps){
+		mid = (left + right) /2;
+		if( f(R,mid) > r){
+			right = mid;
+		}else{
+			left =mid;
+		}
+	}
+	return mid;
+}
+int main(){
+	double R,r;
+	scanf("%lf%lf",&R,&r);
+	printf("%.4f\n", solve(R ,r ));
+	return 0;
+}
