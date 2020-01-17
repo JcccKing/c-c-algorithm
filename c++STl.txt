@@ -1,0 +1,196 @@
+// 高位 加减乘除  
+#include<cstdio>
+#include<cstring>
+struct bign{
+	int d[1000];
+	int len;
+	bign(){
+		memset(d,0,sizeof(d));
+		len =0;
+	}
+};
+bign change(char str[]){
+	bign a;
+	a.len = strlen(str);
+	for(int i=0;i<a.len;i++){
+		a.d[i] = str[a.len - i -1] -'0';
+	}
+	return a;
+}
+bign  add(bign a,bign b){
+	bign c;
+	int carry =0;
+	for(int i=0;i<a.len||i<b.len;i++){
+		int temp = a.d[i] + b.d[i] +carry;
+		c.d[c.len++] = temp %10;
+		carry = temp / 10;
+		 
+	}
+	if(carry !=0){
+		c.d[c.len++] = carry;
+	}
+	return c;
+}
+bign sub(bign a,bign b){
+	bign c;
+	for(int i=0;i<a.len || i<b.len;i++){
+		if(a.d[i] < b.d[i]){
+			a.d[i+1]--;
+			a.d[i]+=10;
+		}
+		c.d[c.len++] = a.d[i] - b.d[i];
+	}
+	while( c.len-1 >=1 && c.d[c.len-1] ==0){
+		c.len--;//去除最高位的0，同时至少保留一位最低位 
+	}
+	return c; 
+}
+bign muti(bign a,int b){
+	bign c;
+	int carry =0;
+	for(int i=0;i<a.len;i++){
+		int  temp= a.d[i] * b + carry;
+		c.d[c.len++] = temp %10;
+		carry = temp /10;
+	}
+	while(carry !=0){
+		c.d[c.len++] = carry %10;
+		carry /=10;
+	}
+	return c;
+}
+bign divide(bign a,int b,int& r){
+	bign c;
+	c.len  = a.len;
+	for(int i=a.len-1; i>=0;i--){
+		r = r *10 +a.d[i];
+		if( r <b) c.d[i] = 0;
+		else{
+			c.d[i] = r/b;
+			r = r%b;
+		} 
+	}
+	while( c.len -1 >=1 && c.d[c.len-1] == 0){
+		c.len --;
+	} 
+	return c;
+} 
+void print(bign a){
+	for(int i =a.len-1;i>=0;i--){
+		printf("%d",a.d[i]);
+	} 
+}
+int main(){
+	char str1[10000],str2[1000];
+	scanf("%s %s",&str1,str2);
+	bign a = change(str1);
+	bign b = change(str2);
+	print(add(a,b));
+	return 0;
+}
+c++ 迭代器 <vector>的使用
+#include<cstdio>
+#include<vector>
+using namespace std;
+int main(){
+	vector<int> vi;
+	for(int i=1;i<=5;i++){
+		vi.push_back(i);
+	}
+	vector<int>::iterator it = vi.begin();
+	for(int i=0;i<5;i++){
+		printf(i ? " %d" : "%d", *(it+i));
+	} 
+	printf("\n\n");
+	
+	vi.pop_back();
+	for(vector<int>::iterator it = vi.begin(); it !=vi.end();it++){
+		printf("%d ",*it);
+	}
+	printf("\n\n");
+	vi.insert(vi.begin() + 2,-1);
+	vi.erase(vi.begin() +1);
+	for(int i=0;i<vi.size();i++){
+		printf("%d",vi[i]);
+	}
+	return 0;
+} 
+
+//pat a1060
+#include<iostream>
+#include<string>
+#include<cstdio>
+using namespace std;
+	int n;
+string deal(string s,int& e){
+	int k=0;
+	while(s.length() >0 &&s[0] == '0'){
+		s.erase(s.begin());
+	}
+	if(s[0] == '.'){
+		s.erase(s.begin());
+		while(s.length() >0 && s[0] =='0'){
+			s.erase(s.begin());
+			e--;
+		}
+	}else{
+		while(k<s.length() && s[k] !='.'){
+			k++;e++;
+		}
+		if(k <s.length()){
+			s.erase(s.begin() + k);
+		}
+	}
+	if(s.length() == 0){
+		e =0;
+	}
+	int num =0;
+	k=0;
+	string res;
+	while( num < n){
+		if( k <s.length()) res+=s[k++];
+		else res +='0';
+		num++; 
+	} 
+	return res;
+}
+int main(){
+	string s1,s2,s3,s4;
+	cin>>n>>s1>>s2;
+	int e1=0,e2=0;
+	s3 = deal(s1,e1);
+	s4 = deal(s2,e2);
+	if(s3 == s4 && e1 == e2){
+		cout<<"YES 0."<<s3<<"*10^"<<e1<<endl;
+	}else{
+		cout<<"NO 0."<<s3<<"*10^"<<e1<<" 0."<<s4<<"*10^"<<e2<<endl;
+	}
+	return 0;
+}
+//#include<iostream>
+#include<string>
+#include<queue>
+#include<stack>
+#include<cstdio>
+using namespace std; 
+int main(){
+	stack<int> st;
+	if(st.empty() == true){
+		printf("empty\n");
+	}else{
+		printf("not empty\n");
+	}
+	for(int i=1;i<=5;i++){
+		st.push(i);
+	}
+	for(int i=1;i<=3;i++){
+		st.pop();
+	}
+	if(st.empty() == true){
+		printf("empty\n");
+	}else{
+		printf("not empty\n");
+	}
+	printf("%d\n", st.top() );
+	return 0;
+} 
