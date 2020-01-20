@@ -1,0 +1,355 @@
+/*
+	并查集 好朋友例题（朋友圈） a和b是 friend ，b 和 c 是 friend 则 a c 也是 friend
+	input 4 2
+		  1 4
+		  2 3
+	output 2 
+*/
+#include<cstdio>
+const int N = 110;
+int father[N];
+bool isRoot[N];
+int findFather(int x){
+	int a = x;
+	while( x!= father[x]){
+		x = father[x];
+	}
+	//路径压缩
+	while( a!= father[a]){
+		int z = father[a];
+		a = father[a];
+		father[z] = x;
+	}
+	return x; 
+} 
+void Union(int a,int b){ //合并 a b  
+	int faA = findFather(a);
+	int faB = findFather(b);
+	if( faA != faB){
+		father[faA] = faB;
+	}
+}
+void init(int n){ //初始化 
+	for(int i=1;i<=n;i++){
+		father[i] = i;
+		isRoot[i] = false;
+	}
+} 
+int main(){
+	int n,m,a,b;
+	scanf("%d %d",&n,&m);
+	init(n);
+	for(int i=0;i<m;i++){
+		scanf("%d %d",&a,&b); //输入两个好朋友关系 
+		Union(a, b); //a b 合并 
+	}
+	for( int i=1;i<=n;i++){
+		isRoot[findFather(i) ] = true; //i 的根节点 是 findFather(i) 
+	}
+	int ans = 0; //记录 朋友圈 个数 
+	for(int i=1;i<=n;i++){ //查找每个圈子的 根节点 个数 即为 圈子个数  
+		ans +=isRoot[i];
+	} 
+	printf("%d\n", ans);
+	return 0;
+} 
+/* codeup 通信系统 http://codeup.cn/problem.php?cid=100000615&pid=0
+	input 
+4 3
+1 2
+2 3
+3 4
+
+3 1
+2 3
+
+0 0 (结束)
+output
+Yes
+No
+*/
+#include<cstdio>
+const int N=1005;
+int father[N];
+int root[N];
+int findfather(int x) //找根节点 
+{
+    int a=x;
+    while(x!=father[x]) x=father[x];
+    while(a!=father[a])
+    {
+        int z=a;
+        a=father[a];
+        father[z]=x;
+    }
+    return x;
+}
+void Union(int a,int b) //a b 合并 
+{
+    int faA=findfather(a);
+    int faB=findfather(b);
+    if(faA!=faB) father[faA]=faB;
+}
+void init(int n) //初始化 
+{
+    for(int i=1; i<=n; i++)
+    {
+        father[i]=i;
+        root[i]=0;
+    }
+}
+int main()
+{
+    int n,m,a,b;
+    while(scanf("%d%d",&n,&m) !=EOF &&(m+n))
+    {
+        if(m>n-1)//如果 m>n-1 会产生环 一定不符合要求 
+        {
+            for(int i=0; i<m; i++) scanf("%d%d",&a,&b);
+            printf("No\n");
+        }
+        else
+        {
+            init(n);
+            for(int i=1; i<=m; i++)
+            {
+                scanf("%d%d",&a,&b);
+                Union(a,b);
+            }
+            for(int i=1; i<=n; i++) root[findfather(i)]=1;
+            int ans=0;
+            for(int i=1; i<=n; i++) ans+=root[i];
+            if(ans==1) printf("Yes\n");
+            else printf("No\n");
+        }
+    }
+}
+/* 并查集 畅通工程  http://codeup.cn/problem.php?cid=100000615&pid=1
+输入
+测试输入包含若干测试用例。每个测试用例的第1行给出两个正整数，分别是城镇数目N ( < 1000 )和道路数目M；
+随后的M行对应M条道路，每行给出一对正整数，分别是该条道路直接连通的两个城镇的编号。为简单起见，城镇从1到N编号。 
+    注意:两个城市之间可以有多条道路相通,也就是说
+    3 3
+    1 2
+    1 2
+    2 1
+    这种输入也是合法的
+    当N为0时，输入结束，该用例不被处理。
+
+输出
+对每个测试用例，在1行里输出最少还需要建设的道路数目。
+
+样例输入
+5 3
+1 2
+3 2
+4 5
+0
+样例输出
+1
+*/ 
+#include<cstdio>
+const int maxn = 100024;
+int father[maxn];
+bool isRoot[maxn];
+int findFather(int x){//找根节点 
+	int a = x;
+	while( x !=father[x]){
+		x= father[x];
+	}
+	//路径压缩 
+	while( a != father[a]){
+		int z = a;
+		a = father[a];
+		father[z] = x;
+	} 
+	return x;
+}
+void Union(int a,int b){ // a b 合并
+	int faA = findFather(a);
+	int faB = findFather(b);
+	if(faA != faB){
+		father[faA] = faB;
+	} 
+} 
+void init(int n){ // 初始化 
+	for(int i=0;i<n;i++){
+		father[i] = i;
+		isRoot[i] = false;
+	}
+} 
+int main(){
+	int m,n,a,b;
+	while( scanf("%d",&n) !=EOF&&n){ // 由于 题意给了 不需要判断环 
+		scanf("%d",&m); 
+		init(n); //初始化； 
+		for(int i=0;i<m;i++){
+			scanf("%d %d",&a,&b);
+			Union(a, b);
+		}
+		for(int i=0;i<n;i++){
+			isRoot[ findFather(i) ] =true;
+		}
+		int ans = 0;
+		for(int i=0;i<n;i++){
+			ans += isRoot[i];
+		} 
+		if(ans >0) printf("%d\n",ans-1);
+		else printf("%d\n",ans);
+		
+		
+	} 
+	return 0;
+} 
+/*	并查集  How Many Tables	 http://codeup.cn/problem.php?cid=100000615&pid=2 
+	输入以整数T（1 <= T <= 25）开头，该整数表示测试用例的数量。然后是T测试用例。
+	每个测试用例均以两个整数N和M（1 <= N，M <= 1000）开头。N表示朋友的数量，朋友从1到N标记。
+	然后跟随M行。每行包含两个整数A和B（A！= B），这意味着朋友A和朋友B彼此认识。两种情况之间将有一个空白行。
+输出
+对于每个测试用例，只需输出Ignatius至少需要多少个表。请勿打印任何空白。
+
+样例输入
+2 
+6 4 
+1 2 
+2 3 
+3 4 
+1 4 
+
+8 10 
+1 2 
+2 3 
+5 6 
+7 5 
+4 6 
+3 6 
+6 7 
+2 5 
+2 4 
+4 3
+样例输出
+3 
+2
+
+*/ 
+#include<cstdio>
+const int maxn =100024;
+int father[maxn]; //存父亲结点 
+bool isRoot[maxn];// 存每个结点 是否是 朋友圈的根节点 
+int findFather(int x){ //查找 根节点 
+	int a = x;
+	while( x != father[x]){
+		x = father[x];
+	}
+	while( a != father[a]){
+		int z = a;
+		a = father[a];
+		father[z] = x;
+	}
+	return x;
+} 
+void Union(int a,int b){ //  合并 a b 
+	int faA = findFather(a);
+	int faB = findFather(b);
+	if( faA != faB){
+		father[faA] = faB;
+	}
+}
+void init(int n){ // 初始化 
+	for(int i=0;i<n;i++){
+		father[i] =i;
+		isRoot[i] = false;
+	} 
+} 
+int main(){
+	int t,m,n,a,b;
+	scanf("%d",&t);
+	while(t--){
+		scanf("%d %d",&n,&m);
+		init(n);
+		for(int i=0;i<m;i++){
+			scanf("%d %d",&a,&b);
+			Union(a,b);
+		}
+		for(int i=0;i<n;i++){
+			isRoot[ findFather(i) ] = true;
+		}
+		int ans = 0;
+		for(int i=0;i<n;i++){
+			ans +=isRoot[i];
+		}
+		printf(t>0 ? "%d\n" : "%d",ans);
+	} 
+	return 0;
+}
+/* 并查集  http://codeup.cn/problem.php?cid=100000615&pid=3
+输入
+输入的第一行包含整数n（0≤n≤100 000）-直接朋友对的数量。接下来的n行分别包含一对数字A和B，
+并用一个空格隔开，表明A和B是直接朋友。（A≠B，1≤A，B≤10000000）
+
+输出
+一行中的输出正好包含一个整数，该整数等于王先生可以保留的男孩的最大数量。
+
+样例输入
+3
+1 3
+1 5
+2 5
+4
+3 2
+3 4
+1 6
+2 6
+
+样例输出
+4
+5 
+
+*/
+#include<cstdio>
+using namespace std;
+const int maxn = 10000001; 
+int ans;  //存最大人数 
+int father[maxn]; //存 根节点 
+int num[maxn];//存 i 地下 共多少人 
+int findFather(int x){ //查找根节点 
+	int a = x;
+	while( x !=father[x]){
+		x= father[x];
+	}
+	//路径压缩
+	while( a!= father[a]){
+		int z = a;
+		a = father[a];
+		father[z]  = x;
+	} 
+	return x;
+}
+void Union(int a,int b){
+	int faA = findFather(a); 
+	int faB = findFather(b);
+	if(faA != faB){
+		father[faA] = faB; //若不是一个分队的，则将fa合并入fb
+		num[faB] += num[faA]; //将fb中的人数再加上新合并过来的人数 
+		if(num[faB] > ans) ans = num[faB];  
+	}
+}
+void Init(int n){
+	for(int i=0;i<n;i++){
+		father[i]= i;
+		num[i] = 1;
+	}
+}
+int main(){
+	int n,a,b;
+	while( scanf("%d", &n) !=EOF){
+		Init(maxn);
+		ans = 1; //能留下的最大人数
+		for(int i=0;i<n;i++){
+			scanf("%d %d",&a,&b);
+			Union(a,b);
+		}
+		printf("%d\n",ans);
+	}
+	return 0;
+}
