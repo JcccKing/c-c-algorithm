@@ -82,3 +82,580 @@ int main(){
 	
 	return 0;
 }
+//  链表
+#include<stdio.h>
+#include<stdlib.h>
+struct node{
+	int data;
+	node* next; 
+};
+node* create(int array[]){
+	node *p,*pre,*head;
+	head = new node;
+	head->next = NULL;
+	pre = head;
+	for(int i=0;i<5;i++){
+		p = new node;
+		p->data = array[i];
+		p->next = NULL;
+		pre->next = p;
+		pre = p;
+	}
+	return head;
+}
+int search_node(node* head,int x){
+	int count = 1;
+	node *p=head->next;
+	while(p !=NULL){
+		if(p->data == x){
+			return count;
+		}else{
+			count++;p=p->next;
+		}
+	}
+	return -1;
+}
+void insert(node* head,int pos,int x){
+	node *p =head;
+	for(int i=0;i<pos-1;i++){
+		p=p->next;
+	}
+	node *pre = new node;
+	pre->next = p->next;
+	pre->data = x;
+	p->next = pre;
+}
+int del(node* head,int x){
+	node *p=head->next;
+	node *pre = head;
+	while(p != NULL){
+		if(p->data == x){
+			pre->next = p->next;
+			p = pre->next;
+			delete(p);
+			return 1;
+		}else{
+			pre = p;
+			p = p->next;
+		}
+	}
+	return 0;
+}
+int main(){
+	int n,b;
+	int array[5]={5,1,3,6,8};
+	node* L =create(array);
+	L=L->next;
+	int a = search_node(L,3);
+	printf("%d\n", a);
+	
+	//insert(L,3,15);
+	int b = del(L,1);
+	printf("%d\n", b);
+	
+	while(L != NULL){
+		printf("%d ",L->data);
+		L=L->next;
+	} 
+	return 0;
+}
+
+//pat A1032 shaing
+#include<stdio.h>
+#include<string.h>
+const int maxn = 100010;
+struct node{
+	char data;
+	int next;
+	int flag;
+}node[maxn];
+int main(){
+	for(int i=0;i<maxn;i++){
+		node[i].flag = 0;
+	} 
+	int s1,s2,n;
+	scanf("%d %d %d",&s1,&s2,&n);
+	int address,next;
+	char data;
+	for(int i=0;i<n;i++){
+		scanf("%d %c %d",&address,&data,&next);
+		node[address].data = data;
+		node[address].next = next;
+	}
+	int p;
+	for( p =s1;p !=-1;p =node[p].next){
+		node[p].flag = 1;
+	}
+	for( p = s2;p !=-1; p=node[p].next){
+		if( node[p].flag == 1) break;
+	}
+	if( p!=-1){
+		printf("%05d\n",p);
+	}else{
+		printf("-1\n");
+	}
+	return 0;
+} 
+//pat A1052 linked list sort
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn= 100010;
+struct Node{ //定义链表 
+	int address,data,next;
+	int flag;
+}node[maxn];
+bool cmp(Node a,Node b){
+	if(a.flag == -1 || b.flag == -1){
+		return a.flag > b.flag;//只要a和b 其中一个是无效结点，就把它放后面去 
+	}else{
+		return a.data < b.data;//如果都是有效节点，则按要求排序 
+	}
+}
+int main(){
+	for( int i=0;i<maxn;i++){
+		node[i].flag = -1;
+	}
+	int n,begin,address;
+	scanf("%d %d",&n,&begin);
+	for(int i=0;i<n;i++){
+		scanf("%d",&address);
+		scanf("%d %d",&node[address].data,&node[address].next);
+		node[address].address = address;
+	}
+	int count = 0,p =begin;
+	//枚举链表，对flag 进行标记，同时计数有效结点个数 
+	while(p !=-1){
+		node[p].flag = 1;
+		count++;
+		p = node[p].next;
+	}
+	if(count ==0){//新链表中没有结点时输出 0 -1 
+		printf("0 -1");
+	}else{
+		//筛选有效结点，并按data 从小到大排序 
+		sort(node, node + maxn, cmp);
+		// 防止-1 被%05d 化，提前判断 
+		printf("%d %05d\n",count,node[0].address);
+		for(int i=0;i<count;i++){
+			if(i !=count-1){
+				printf("%05d %d %05d\n",node[i].address,node[i].data,node[i+1].address);
+			} else{
+				printf("%05d %d -1\n",node[i].address,node[i].data);
+			} 
+		} 
+	}
+	return 0;
+} 
+dfs
+#include<stdio.h>
+#include<algorithm>
+#include<vector>
+using namespace std;
+const int maxn = 30;
+int n,V,maxValue =0;
+int w[maxn],c[maxn];
+
+void DFS(int index,int sumW,int sumC){
+	if(index == n){
+		if(sumW <=V &&sumC > maxValue){
+			maxValue = sumC;
+		} 
+		return;
+	}
+	DFS(index + 1,sumW,sumC);
+	DFS(index + 1,sumW + w[index],sumC +c[index]);
+	
+} /* input
+	 5 8
+	 3 5 1 2 2
+	 4 5 2 1 3
+	 output 
+	 10 
+void DFS2(int index,int sumW,int sumC){
+	if( index ==n){
+		return ;
+	}
+	DFS2(index +1, sumW, sumC);
+	if(sumW + w[index] <= V){
+		if(sumC + c[index] > ans){
+			ans = sumC + c[index];
+		}
+		DFS2(index + 1,sumW + w[index],sumC + c[index]); 
+	} 
+}
+
+int k,x,maxSumSqu =-1, A[maxn];
+//temp 存放临时方案，ans 存放平方和最大方案 
+vector<int> temp;
+vector<int> ans;
+// 当前处理 index 号整数，当前已选整数个数 为nowk
+// 当前已选整数之和 sum ，当前 已选整数平方和 为 sumSqu 
+void DFS3(int index,int nowK,int sum,int sumSqu){
+	if(nowK == k && sum == x){ // 找到k个数的和为x 
+		if(sumSqu > maxSumSqu){ // 如果比当前找到的更优 
+			maxSumSqu = sumSqu; // 更新最大平方和 
+			ans = temp; // 更新最优方案 
+		}
+		return ;
+	}
+	if(index == n || nowK > k || sum >x) return ;
+	// 选 index 号 
+	temp.push_back(A[index]);
+	DFS3(index + 1,nowK +1,sum+A[index],sumSqu + A[index] *A[index]);
+	temp.pop_back();
+	//不选index 号
+	DFS3(index +1, nowK, sum, sumSqu); 
+}*/
+int main(){
+	scanf("%d %d", &n, &V);
+	for(int i=0;i<n;i++){
+		scanf("%d",&w[i]);
+	}
+	for(int i=0;i<n;i++){
+		scanf("%d",&c[i]);
+	}
+	
+	DFS( 0, 0, 0);
+	printf("%d\n",maxValue);
+	return 0;
+}
+BFS PAT
+/* 给出一个m*n的矩阵，矩阵中的元素为0 1 称位置(x,y)与其上下左右四个位置（x,y+1)(x,y-1)
+(x+1,y)(x-1,y) 是相邻的，如果矩阵中有若干个1是相邻的，那么称这些1构成一个快，求矩阵块数
+input:
+6 7
+0 1 1 1 0 0 1
+0 0 1 0 0 0 0 
+0 0 0 0 1 0 0
+0 0 0 1 1 1 0
+1 1 1 0 1 0 0
+1 1 1 1 0 0 0  
+输出  为 4 	
+*/ 
+#include<cstdio>
+#include<queue>
+using namespace std;
+const int maxn = 100;
+struct node{
+	int x,y;
+}Node; 
+int n,m;
+int matrix[maxn][maxn];
+bool inq[maxn][maxn] = {false};
+int X[4] = {0,0,1,-1};
+int Y[4] = {1,-1,0,0};
+bool judge(int x,int y){
+	if( x >=n || x<0 || y>=m || y<0) return false;
+	if(matrix[x][y] == 0 || inq[x][y] == true) return false;
+	return true; 
+} 
+void BFS(int x,int y){
+	queue<node> Q;
+	Node.x = x;Node.y = y;
+	Q.push(Node);
+	inq[x][y] = true;
+	while( !Q.empty() ){
+		node top = Q.front();
+		Q.pop();
+		for(int i=0;i<4;i++){
+			int newX = top.x + X[i];
+			int newY = top.y + Y[i];
+			if(judge(newX,newY)){
+				Node.x =newX,Node.y = newY;
+				Q.push(Node);
+				inq[newX][newY] = true;
+			}
+		}
+	} 
+} 
+int main(){
+	scanf("%d %d",&n,&m);
+	for(int x= 0;x<n;x++){
+		for(int y= 0;y<m;y++){
+			scanf("%d",&matrix[x][y]);
+		}
+	}
+	int ans = 0;
+	for(int x = 0;x<n;x++){
+		for(int y = 0;y<m;y++){
+			if(matrix[x][y] == 1 && inq[x][y] ==false){
+				ans++;
+				BFS(x,y);
+			} 
+		}
+	} 
+	printf("%d\n",ans);
+	return 0;
+}
+/* n*m 大小迷宫，其中 *代表不可通过的墙壁，而“.”代表平地，S表示起点，T代表终点，移动过程中
+如果当前位置是(x,y),且每次只能前往上下左右(x,y+1)(x,y-1)(x+1,y)(x-1,y)四个位置的平地
+求从起点S到终点T的最少步数 
+input 5 5
+		.....
+		.*.*.
+		.*S*.
+		.***.
+		...T*
+		2 2 4 3
+	output 11 
+*/
+#include<cstdio>
+#include<cstring>
+#include<queue>
+using namespace std;
+const int maxn=100;
+struct node{
+	int x,y;
+	int step;
+}S,T,Node;
+int n,m;
+char maze[maxn][maxn];
+bool inq[maxn][maxn]={false};
+int X[4] = {0,0,1,-1};
+int Y[4] = {1,-1,0,0};
+//检测位置(x,y)是否有效
+bool test(int x,int y){
+	if( x>= n || x<0 || y>= m || y<0) return false;
+	if( maze[x][y] =='*') return false;
+	if(inq[x][y] == true) return false;
+	return true; 
+} 
+int BFS(){
+	queue<node> q;
+	q.push(S);
+	while( !q.empty() ){
+		node top = q.front();
+		q.pop();
+		if(top.x == T.x && top.y == T.y){
+			return top.step;
+		} 
+		for(int i=0;i<4;i++){
+			int newX = top.x +X[i];
+			int newY = top.y +Y[i];
+			if( test(newX, newY)){
+				Node.x = newX,Node.y = newY;
+				Node.step = top.step +1;
+				q.push(Node);
+				inq[newX][newY] = true;
+			} 
+		}
+	} 
+	return -1;
+} 
+int main(){
+	scanf("%d %d",&n,&m);
+	for(int i=0;i<n;i++){
+		getchar();
+		for(int j=0;j<m;j++){
+			maze[i][j] = getchar(); 
+		} 
+		maze[i][m+1] = '\0'; 
+	} 
+	scanf("%d %d %d %d",&S.x,&S.y,&T.x,&T.y);
+	S.step = 0;
+	printf("%d\n",BFS() );
+	return 0;
+}
+
+pat A1020
+#include<cstdio>
+#include<algorithm>
+#include<queue>
+#include<cstring>
+using namespace std;
+const int maxn = 50;
+struct node{
+	int data;
+	node *lchild;
+	node *rchild;
+}; 
+int pre[maxn],in[maxn],post[maxn];//存 先序 中序 后序 顺序 
+int n;//节点个数 
+//当前二叉树的后序序列 区间为postl,postr,中序序列为inl inr
+//create 函数返回 构建出 二叉树的根节点地址 
+node* create(int postl,int postr,int inl,int inr){
+	if(postl > postr){
+		return NULL; //后序序列 长度 小于等于0，直接返回 
+	}
+	node* root = new node; // 新建一个新的结点，用来存放当前二叉树的根节点 
+	root->data = post[postr];//新节点数据为根节点的值 
+	int k;
+	for(k=inl;k<inr;k++){
+		if(in[k] == post[postr]){ //中序序列中找到in[k ] == pre[l]
+			break;
+		}
+			
+	}
+
+	int numLeft = k-inl; //左子树的结点个数
+	//返回左子树的根节点地址，赋值给root的左指针 
+	root->lchild = create(postl,postl +numLeft-1,inl,k-1);
+	//返回右子树的根节点地址，赋值给root右指针 
+	root->rchild = create(postl + numLeft,postr - 1,k+1,inr);
+	return root; //返回根节点地址 
+}
+int num=0; //已输出的结点个数 
+void BFS(node* root){
+	queue<node*> q; //注意队列里是存地址 
+	q.push(root);//将根节点地址入队 
+	while( !q.empty() ){
+		node* now = q.front(); //取出队首元素 
+		q.pop();
+		printf("%d",now->data); //访问队首元素 
+		num++;
+		if(num <n) printf(" ");
+		if(now->lchild !=NULL) q.push(now->lchild); // 左子树非空 
+		if(now->rchild !=NULL) q.push(now->rchild);// 右子树 非空  
+	}
+}
+int main(){
+	scanf("%d",&n);
+	for(int i=0;i<n;i++){
+		scanf("%d",&post[i]);
+	}
+	for(int i=0;i<n;i++){
+		scanf("%d",&in[i]);
+	}
+	node* root = create(0,n-1,0,n-1); //建树 
+	BFS(root);// 层次遍历· 
+	return 0; 
+}
+
+/* 	pat A1053
+	 
+*/ 
+
+#include<cstdio>
+#include<vector>
+#include<algorithm>
+using namespace std;
+const int maxn = 110;
+struct node{
+	int weight; // 数据域 
+	vector<int> child; // 指针域 
+} Node[maxn];
+bool cmp(int a,int b){
+	return Node[a].weight > Node[b].weight; //按节点 数据域 从大到小排序 
+} 
+int n,m,S;//节点数 边数 给定的和 
+int path[maxn]; //记录路径
+//当前访问结点为index numNode 为当前路径 path 上的结点个数
+//sum 为当前结点 点权和
+void DFS(int index,int numNode,int sum) {
+	if(sum > S) return ;
+	if( sum == S){
+		if( Node[index].child.size() != 0 ) return;
+		// 到达叶子结点，此时path[] 中存放了一条完整的路径，输出它 
+		for(int i=0 ;i < numNode; i++){
+			printf("%d", Node[path[i]].weight);
+			if( i < numNode -1 ) printf(" ");
+			else printf("\n");
+		}
+		return ;
+	}
+	for(int i=0;i< Node[index].child.size(); i++){ //枚举所有结点 
+		int child = Node[index].child[i]; //结点 index 的第i的子节点编号 
+		path[numNode] = child;//将结点child 加到路径path 末尾 
+		DFS(child, numNode +1,sum +Node[child].weight); // 递归进入下一层 
+	} 
+}
+
+int main(){
+	scanf("%d %d %d",&n,&m,&S);
+	for(int i=0;i<n;i++){
+		scanf("%d",&Node[i].weight);
+	} 
+	int id,k,child;
+	for(int i=0;i<m;i++){
+		scanf("%d %d",&id,&k);
+		for(int j=0;j<k;j++){
+			scanf("%d",&child);
+			Node[id].child.push_back(child); 
+		}
+		sort(Node[id].child.begin(),Node[id].child.end(),cmp);
+	}
+	path[0] = 0;
+	DFS(0,1,Node[0].weight);
+	return 0;
+}
+/*
+	pat A1043 is it a binary search
+*/
+
+#include<cstdio>
+#include<vector> 
+using namespace std;
+struct node{
+	int data; //数据域
+	node *left,*right; //指针域 
+};
+
+void insert(node* &root,int data){
+	if(root == NULL){  //到达空结点时，即是插入的位置 
+		root = new node;
+		root->data = data;
+		root->left = root->right = NULL;
+		return ;
+	} 
+	if(data < root->data) insert(root->left,data);
+	else insert(root->right,data);
+} 
+void PreOrder(node* root,vector<int>&vi){
+	//先序遍历，结果存入vi
+	if(root ==NULL) return ;
+	vi.push_back(root->data);
+	PreOrder(root->left,vi);
+	PreOrder(root->right,vi); 
+} 
+void PreOrderMirror(node* root,vector<int>&vi){ //镜像树 先序遍历 
+	if(root== NULL) return;
+	vi.push_back(root->data);
+	PreOrderMirror(root->right,vi);
+	PreOrderMirror(root->left,vi);
+} 
+void PostOrder(node* root,vector<int>&vi){ //后续遍历 
+	if(root == NULL) return ;
+	PostOrder(root->left,vi);
+	PostOrder(root->right,vi);
+	vi.push_back(root->data);
+} 
+void PostOrderMirror(node* root,vector<int>&vi){
+	if(root == NULL) return ;
+	PostOrderMirror(root->right,vi);
+	PostOrderMirror(root->left,vi);
+	vi.push_back(root->data); 
+} 
+//origin 存放初始序列
+// pre post 先序 后序 preM，postM 存镜像 先序 后序
+vector<int> origin,pre,preM,post,postM;
+int main(){
+	int n,data;
+	node* root = NULL; //初始化 一个 结点 
+	scanf("%d",&n); //输入结点个数 
+	for(int i=0;i<n;i++){
+		scanf("%d",&data);
+		origin.push_back(data); //将数据加入 origin 
+		insert(root,data);	//将data 插入二叉树 
+	} 
+	PreOrder(root, pre);
+	PreOrderMirror(root, preM);
+	PostOrder(root, post);
+	PostOrderMirror(root, postM);
+	if(origin == pre){
+		printf("YES\n");
+		for(int i=0;i < post.size();i++){
+			printf("%d", post[i]);
+			if(i < post.size() - 1) printf(" ");
+		}
+	} else if( origin == preM){
+		printf("YES\n");
+		for(int i=0;i<postM.size();i++){
+			printf("%d",postM[i]);
+			if(i< postM.size() -1) printf(" ");
+		}
+	}else{
+		printf("NO\n");
+	}
+	return 0;
+} 
