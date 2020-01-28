@@ -1,0 +1,2107 @@
+
+// 哈夫曼树 求 wpl 
+#include<cstdio>
+#include<queue>
+#include<vector>
+using namespace std;
+// 代表小顶堆的优先队列
+priority_queue<long long, vector<long long>, greater<long long> > q; 
+int main(){
+	int n;
+	long long temp, x, y, ans= 0;
+	scanf("%d",&n);
+	for(int i=0;i<n;i++){
+		scanf("%lld",&temp);
+		q.push(temp); //将初始重量压入优先队列 
+	}
+	while(q.size() > 1){ // 只要优先队列中至少有两个元素 
+		x = q.top();
+		q.pop();
+		y = q.top();
+		q.pop();
+		q.push(x+ y); // 取出堆顶的两个元素，求和后压入优先队列 
+		ans += x+y;  // 累计求和的结果 
+	} 
+	printf("%lld\n",ans); // 
+	return 0;
+}
+
+图论/*
+	图论 邻接矩阵和邻接表 版本 代码  
+
+
+#include<cstdio>
+using namespace std;
+const int MAXV = 1000;  //设置最大顶点个数 
+const int INF = 100000000;  //设置inf 为一个很大的数 
+int n,G[MAXV][MAXV]; //n为顶点个数 maxv 为最大顶点数 
+bool vis[MAXV] = {false}; //如果顶点 i 已被访问，则 vis[i]= true 初值为false 
+void DFS(int u,int depth){ //u为当前访问的顶点符号，depth为深度 
+	vis[u] = true;  //设置u已被访问
+	//如果需要对u 进行一些操作，可以在这里进行
+	//下面对所有从u出发能到达的分支顶点进行枚举
+	for(int v= 0; v<n;v++){ //对每个顶点进行遍历 
+		if( vis[v] == false && G[u][v] !=INF){  //如果v未被访问且u可到达v  
+			DFS(v,depth +1); //访问v depth +1 
+		} 
+	} 
+	
+}
+void DFSTrave(){
+	for(int u=0;u<n;u++){
+		if(vis[u] = false){
+			DFS(u, 1);
+		}
+	}
+} */
+// 邻接表版本 
+#include<cstdio>
+#include<vector>
+using namespace std;
+const int MAXV=1000;
+vector<int> Adj[MAXV]; 
+int n;
+bool vis[MAXV] = {false};
+void DFS(int u,int depth){
+	vis[u] = true;
+	for(int i=0;i<Adj[u].size();i++){
+		int v = Adj[u][i];
+		if(vis[v] = false){
+			DFS(v , depth +1); 
+		}
+	}
+}
+void DFSTrave(){
+	for(int u=0;u<n;u++){
+		if( vis[u] == false){
+			DFS(u,1);
+		} 
+	}
+}
+
+/*
+	图论 head of Gang PAT A1034  
+*/
+#include<string>
+#include<map>
+#include<iostream>
+using namespace std;
+const int maxn = 2010; //总人数 
+const int INF = 10000000; //无穷大 
+map<int, string> intToString; //编号 姓名
+map<string,int> stringToInt; //姓名->编号
+map<string, int> Gang; // head-> 人数
+int G[maxn][maxn] = {0}, weight[maxn] ={0};//邻接矩阵G，点权 weight 
+int n,k,numPerson = 0;
+bool vis[maxn] = {false};
+// DFS函数访问单个连通块， nowVisit 为当前访问的编号
+// head 为头目 ，numMember 为成员编号 totalValue 为连通块的总边权
+void DFS(int nowVisit, int& head,int& numMember, int& totalValue){
+	numMember++; //成员人数 加1 
+	vis[nowVisit] = true; //标记nowVist 已访问 
+	if(weight[nowVisit] > weight[head]){
+		head = nowVisit; //当前访问结点的点权大于头目的点权，则更新头目 
+	} 
+	for(int i=0;i<numPerson;i++){ //枚举所有人 
+		if(G[nowVisit][i] > 0){ //如果从nowVist 能到达 i 
+			totalValue += G[nowVisit][i]; //连通块的总边权增加该边权 
+			G[nowVisit][i] = G[i][nowVisit] = 0; //删除这条边，防止回头 
+			if( vis[i] == false){ // 如果i未被访问，则递归访问i 
+				DFS(i,head,numMember,totalValue);
+			} 
+		}
+	}
+} 
+
+void DFSTrave(){
+	for(int i=0;i< numPerson; i++){ //枚举 所有人 
+		if(vis[i] == false){ //如果i未被访问 
+			int head = i,numMember = 0,totalValue = 0;  //头目，成员数，总边权 
+			DFS(i, head, numMember, totalValue); //遍历i所在的连通块 
+			if(numMember > 2 && totalValue > k){ //成员数大于 2且总边权 大于k
+				// head 人数为numMember 
+				Gang[intToString[head]] = numMember;
+			} 
+		}
+	}
+}
+//change 函数 返回 姓名 str 对应的编号
+int change(string str){
+	if(stringToInt.find(str) != stringToInt.end() ){
+		return stringToInt[str]; //返回编号 
+	}else{
+		stringToInt[str] = numPerson; //str编号为numMember 
+		intToString[numPerson] = str; //numPerson 对应 str 
+		return numPerson++;  //总人数 +1 
+	}
+} 
+int main(){
+	int w;//边的权值 
+	string str1,str2; //编号 
+	cin >> n>> k;
+	for(int i=0;i<n;i++){
+		cin >> str1 >> str2 >> w; //输入边的两个端点 和点权 
+		int id1 = change(str1); //将str1转换成id1 
+		int id2 = change(str2);
+		weight[id1] += w; //id1 的点权 增加w 
+		weight[id2] += w; //id2 的点权 增加 w 
+		G[id1][id2] += w;//边id1-> id2 边权增加 w 
+		G[id2][id1] += w;
+		 
+	} 
+	DFSTrave();
+	cout <<Gang.size()<<endl;
+	map<string, int>::iterator it;
+	for(it = Gang.begin();it !=Gang.end();it++){
+		cout<< it->first << " " <<it->second <<endl; 
+	} 
+	return 0;
+}
+
+/////bfs 邻接矩阵版本
+int n,G[MAXV][MAXV];
+bool inq[MAXV] ={false};
+void BFS(int u){
+	queue<int> q;
+	q.push(u);
+	inq[u] = true;
+	while( !q.empty() ){
+		int u = q.front();
+		q.pop();
+		for(int v=0;v<n;v++){
+			if( inq[v] == false &&G[u][v] !=INF){
+				q.push(v);
+				inq[v] = true;
+			}
+		}
+	}
+} 
+void BFSTrave(){
+	for(int u=0;u<n;u++){
+		if( inq[u] == false){
+			BFS(q);
+		}
+	}
+}
+//临界版本
+vector<int> Adj[MAXV];
+int n;
+bool inq[MAXV] = {false};
+void BFS(int u){
+	queue<int> q;
+	q.push(u);
+	inq[u] = true;
+	while( !q.empty() ){
+		int u = q.front();
+		q.pop();
+		for(int i=0;i<Adj[u].size();i++){
+			int v = Adj[u][i];
+			if(inq[v] == false){
+				q.push(v);
+				inq[v] = true;
+			}
+		}
+	}
+}  
+
+void BFSTrave(){
+	for(int u=0;u<n;u++){
+		if(inq[u] == false){
+			BFS(q);
+		}
+	}
+}
+
+///存放顶点层号和编号
+struct node{
+	int v;
+	int layer;
+}; 
+
+void BFS(int s){
+	queue<Node> q;
+	Node start;
+	start.v = s;
+	start.layer = 0;
+	q.push(start);
+	inq[start.v] = true;
+	while( !q.empty() ){
+		Node topNode = q.front();
+		q.pop();
+		int u=topNode.v;
+		for(int i=0;i<Adj[u].size();i++){
+			Node next = Adj[u][i];
+			next.layer = topNodelayer +1;
+			if(inq[next.v] == false){
+				q.push(next);
+				inq[next.v] = true; 
+			}
+		}
+	}
+}
+
+//pat A1076
+#include<cstdio>
+#include<cstring>
+#include<vector>
+#include<queue>
+using namespace std;
+const int MAXV = 1010;
+struct node{
+	int id; //结点编号 
+	int layer; //结点层号 
+};
+vector<node> Adj[MAXV]; //邻接表 
+bool inq[MAXV] = {false};  //顶点是否已被加入过队列
+
+int BFS(int s,int L){ //start 为起点，L为层数上仙
+	int numForward = 0; //转发数 
+	queue<node> q;//BFS队列 
+	node start;//定义起始结点 
+	start.id = s; //起始结点编号 
+	start.layer = 0; //起始结点层号为 0 
+	q.push(start); //将起始结点压入队列 
+	inq[start.id]  = true; //起始结点编号设为 已被加入过队列
+	while( !q.empty() ){
+		node topNode = q.front(); //取出队首结点 
+		q.pop(); //队首结点 出队 
+		int u = topNode.id; //队首结点的编号
+		for(int i=0; i< Adj[u].size() ; i++){
+			node next = Adj[u][i];
+			next.layer = topNode.layer + 1;
+			if( inq[next.id] == false && next.layer <= L){
+				//如果next 编号 未被加入过队列，且next 的层次不超过上限L
+				q.push(next);
+				inq[next.id] = true;
+				numForward++; 
+			}
+		}
+	}
+	return numForward; // 返回转发数 
+} 
+int main(){
+	node user;
+	int n,L,numFollow, idFollow;
+	scanf("%d %d",&n,&L);
+	for(int i=1;i<=n;i++){
+		user.id = i;
+		scanf("%d",&numFollow);
+		for( int j=0; j<numFollow;j++){
+			scanf("%d",&idFollow);
+			Adj[idFollow].push_back(user);
+		}
+	}
+	int numQuery, s;
+	scanf("%d",&numQuery);
+	for(int i=0;i<numQuery;i++){
+		memset(inq,false , sizeof(inq)) ;
+		scanf("%d", &s);
+		int numForward = BFS(s, L);
+		printf("%d\n",numForward); 
+	}
+	return 0;
+} 
+codeup A连通图
+#include<algorithm>
+#include<iostream>
+#include<queue>
+#include<cstring>
+#include<vector>
+using namespace std;
+vector<int>map[1000010];
+bool vis[1000010] ={false} ; 
+bool HASH[1000010]={false};
+void bfs(int u)
+{
+	queue<int>q;
+	q.push(u);
+	vis[u] = true;
+	while (!q.empty())
+	{
+		int top = q.front();
+		q.pop();
+		for (int i=0;i<map[top].size();i++)
+		{
+			int v = map[top][i];
+			if (vis[v]==false)
+			{
+				q.push(v);
+				vis[v] = true;
+			}
+		}
+	}
+}
+int BFS(int n)
+{
+	int ans=0;
+	for (int u=0;u<=n;u++)
+	{
+		if (vis[u]==false && HASH[u]==true)
+		{
+			bfs(u);
+			ans++;
+		}
+	}
+	return ans;
+}
+ 
+int main()
+{
+	int n=0,m,j,k,i,T,a,c,b,d;
+	while(cin>>a>>b)
+	{   
+	    n = max(n,max(a,b));
+		map[a].push_back(b);	
+		map[b].push_back(a);
+		HASH[a] = HASH[b] = true;
+	
+	}
+	cout<<BFS(n)<<endl;
+	return 0; 
+}
+用dfs 解决
+ #include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<vector>
+#include<algorithm> 
+using namespace std;
+const int maxn = 10000024;
+vector<int> G[maxn];
+int vis[maxn];
+void DFS(int u){
+	vis[u] =1;
+	for(int i=0;i<G[u].size();i++){
+		int v= G[u][i];
+		if( vis[v] == 0){
+			DFS(v);
+		}
+	}
+}
+int main(){
+	int  n = -1;
+	int u,v;
+	while( scanf("%d %d",&u,&v) !=EOF){
+		memset(vis, 0 ,sizeof(vis));
+		if( u != v){
+			G[u].push_back(v);
+			G[v].push_back(u);
+		}else{
+			G[u].push_back(v);
+		}
+		n = max(n,u);
+		n = max(n,v);
+	} 
+	int ans = 0;
+	for(int i=1;i<=n;i++){
+		if(vis[i] == 0 &&G[i].size() >0){
+			DFS(i);ans++; 
+		}
+	}
+	printf("%d",ans);
+	return 0;
+}
+//codeup b 连通图  http://codeup.cn/problem.php?cid=100000620&pid=1
+//并查集
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+using namespace std;
+const int nmax=1010;
+int father[nmax];
+int isRoot[nmax];
+ 
+int findFather(int u){
+	if(u==father[u]) return u;
+	else{
+		int f=findFather(father[u]);
+		father[u]=f;
+		return f;
+	}
+} 
+ 
+void Union(int u,int v){
+	int fu=findFather(u);
+	int fv=findFather(v);
+	if(fu!=fv){
+		father[fu]=fv;
+	} 
+}
+ 
+void init(int n){
+	for(int i=1;i<=n;i++){
+		father[i]=i;
+		isRoot[i]=0;
+	}
+}
+ 
+int main() {
+	int n,m;//点数，边数
+	int u,v;
+	while( scanf("%d %d",&n,&m)!=EOF && n+m){
+		init(n);
+		
+		for(int i=0;i<m;i++){
+			scanf("%d %d",&u,&v); 
+			Union(u,v);
+		}
+		int ans=0;
+		for(int i=1;i<=n;i++){
+			if(father[i]==i){
+				ans++;
+			}
+		}
+        printf(ans==1 ? "YES\n" :"NO\n");
+	} 
+	return 0;
+}
+
+
+//图的DFS遍历 计算连通块数 
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <cstring> 
+using namespace std; 
+const int nmax=1010;
+vector<int> G[nmax];
+int vis[nmax];//1已被访问 0未被访问 
+ 
+//遍历连通块 
+void DFS(int u){
+	vis[u]=1;
+	for(int i=0;i<G[u].size();i++){
+		int v=G[u][i];
+		if(vis[v]==0){//如果该节点未被访问，则深度遍历 
+			DFS(v);
+		} 
+	}
+	G[u].clear(); 
+} 
+int main(int argc, char** argv) {
+	int n;//点数 
+	int m;//边数
+	while(cin>>n>>m){
+		if(n==0){
+			break;
+		}
+		memset(vis,0,sizeof(vis));
+		int u,v;
+		for(int i=0;i<m;i++){
+			cin>>u>>v;
+			G[u].push_back(v);
+			G[v].push_back(u);
+		} 
+		int blk=0;
+		//遍历整个图G
+		for(int i=1;i<=n;i++){
+			if(vis[i]==0){
+				DFS(i);//访问i所在的连通块 
+				blk++; 
+			}
+		} 
+		//cout<<blk<<endl;
+		if(blk==1){
+			cout<<"YES"<<endl;
+		}else{
+			cout<<"NO"<<endl;
+		}
+	} 
+	return 0;
+}
+
+#include<cstdio>
+using namespace std;
+const int MAXV = 1000;
+const int INF = 100000000;
+int n,G[MAXV][MAXV];
+int d[MAXV];
+bool vis[MAXV] = {false};
+//邻接矩阵 
+void Dijkstra(int s){
+	fill(d, d+MAXV,INF); //慎用memset
+	d[s] = 0;
+	for(int i=0;i<n;i++){
+		int u = -1,MIN = INF;
+		for(int j=0;j<n;j++){
+			if(vis[j] == false && d[j] <MIN){
+				u = j;
+				MIN = d[j];
+			}
+		}
+		//找不到小于INF 的d[u]，说明剩下的顶点和起点s不连通
+		if( u == -1) return ;
+		vis[u] = true;
+		for(int v=0;v<n;v++){
+			//如果v未访问&& u 能到达v && 以u为中介点可以是d[v]更优
+			if(vis[v] == false && G[U][V] != INF && d[u] + G[u][v] <d[v]){
+				d[v] = d[u] + G[u][v];//优化d[v] 
+			} 
+		} 
+	} 
+} 
+//邻接表法
+#include<cstdio>
+using namespace std;
+const int MAXV =1000;
+const int INF = 1000000; 
+struct Node{
+	int v,dis;
+};
+vector<Node> Adj[MAXV];
+int n;
+int d[MAXV];
+bool vis[MAXV] = {false};
+void Dijkstra(int s){
+	fill(d,d+MAXV，INF);
+	d[s] = 0;
+	for(int i=0;i<n;i++){
+		int u = -1, MIN = INF;
+		for(int j=0;j<n;j++){
+			if( vis[j] == false && d[j] <MIN){
+				u = j;
+				MIN = d[j];
+			}
+		}
+		//找不到比inf小的d[u ]，说明剩下的顶点和起点s不连通
+		if(u == -1)  return ;
+		vis[u] = true;
+		//只是下面这个 for 和 邻接矩阵写法不同
+		for(int j=0;j<Adj[u].size();j++){
+			int v = Adj[u][j].v;
+			if( vis[v] == false && d[u] +Adj[u][j].dis <d[v]){
+				//如果v未访问&& 以u为中介点可以更优 更新
+				d[v] = d[u] + Adj[u][v].dis; 
+			}
+		} 
+	}
+} 
+最短路径 dijkstra
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int MAXV = 1000;
+const int INF = 10000000;
+int  n,m,s, G[MAXV][MAXV]; //n为顶点数，m为边数 s为起点
+int d[MAXV]; //起点到达各点的最短路径长度
+bool vis[MAXV] = {false};
+void Dijkstra(int s){
+	fill(d , d+MAXV,INF);
+	d[s] = 0;
+	for(int i=0;i<n;i++){
+		int u = -1, MIN = INF;
+		for(int j=0;j<n;j++){
+			if( vis[j] == false && d[j] < MIN){
+				u = j;
+				MIN = d[j];
+			}
+		}
+		if( u == -1) return ;
+		vis[u] = true;
+		for(int v=0;v<n;v++){
+			if( vis[v] == false && G[u][v] !=INF && d[u]+G[u][v] <d[v]){
+				d[v] = d[u] +G[u][v];
+			}
+		}
+	}
+} 
+
+int main(){
+	int u,v,w;
+	scanf("%d %d %d",&n,&m,&s); //顶点个数 边数 起点编号
+	fill(G[0], G[0] +MAXV *MAXV , INF);
+	for(int i=0;i<m;i++){
+		scanf("%d %d %d",&u,&v,&w); //顶点个数 边数 起点编号 
+		G[u][v] = w;
+	} 
+	Dijkstra(s);
+	for(int i=0;i<n;i++){
+		printf(i ? "%d":" %d",d[i]);
+	}
+	return 0;
+}
+
+//pat 1A1003
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+const int MAXV = 510;
+const int INF = 10000000000;
+// n 为定点数，m为边数 st和ed 分别为起点和终点
+//g为邻接矩阵，weight 为点权
+//d[]记录最短距离w[]记录最大点权之和，num[]记录最短路径条数
+int n,m,st,ed,G[MAXV][MAXV],weight[MAXV];
+int d[MAXV], w[MAXV],num[MAXV];
+bool vis[MAXV] = {false};
+void Dijkstra(int s){
+	fill(d, d+MAXV,INF);
+	memset(num, 0,sizeof(num));
+	memset(w,0,sizeof(w));
+	d[s] =0;
+	w[s] = weight[s];
+	num[s] = 1;
+	for(int i=0;i<n;i++){
+		int u = -1,MIN = INF;
+		for(int j=0;j<n;j++){
+			if(vis[j] == false && d[j] < MIN){
+				u = j;
+				MIN = d[j];
+			}
+		}
+		//找不到小于INF 的d[u] 说明剩下的顶点和起点s不连通
+		if( u==-1) return ;
+		vis[u] = true;
+		for(int v=0;v<n;v++){
+			//如果v未访问 && u能到达v && 以u为中介点可以使d[v] 更优
+			if(vis[v] == false && G[u][v] !=INF){
+				if(d[u] + G[u][v] <d[v]){ //以u为中介点能令d[v]变小
+					d[v] = d[u] +G[u][v];
+					w[v] = w[u] +weight[v];
+					num[v] = num[u];
+					 
+				}else if(d[u] +G[u][v] == d[v]){ //找到一条相同长度的路径 
+					if(w[u] + weight[v] > w[v]){ //以u 为中介点时点权之和更大 
+						w[v] = w[u] +weight[v]; // w[v] 继承w[u] 
+					}
+					//最短路径条数与点权无关，必须写外面
+					num[v] +=num[u]; 
+				}
+			} 
+		} 
+	} 
+} 
+int main(){
+	scanf("%d %d %d %d",&n,&m,&st,&ed);
+	for(int i=0;i<n;i++){
+		scanf("%d",&weight[i]); //读入点权 
+	}
+	int u,v;
+	fill( G[0],G[0] + MAXV*MAXV,INF); //初始化 
+	for(int i=0;i<m;i++){
+		scanf("%d %d",&u,&v);
+		scanf("%d",&G[u][v]); //读入边权
+		G[v][u] = G[u][v]; 
+	} 
+	Dijkstra(st); 
+	printf("%d %d\n",num[ed],w[ed]); //最短路径条数，最短路径最大点权值 
+	return 0;
+}
+//pat A1030
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+const int MAXV = 510;
+const int INF = 100000000;
+//n为顶点数，m为边数 st和 ed 分别为起点终点
+//G为距离矩阵，cost 为花费
+// d[]记录最短距离，c[]记录最小花费
+int n,m,st,ed,G[MAXV][MAXV],cost[MAXV][MAXV];
+int d[MAXV], c[MAXV],pre[MAXV];
+bool vis[MAXV] = {false}; 
+void Dijkstra(int s){
+	fill(d,d+MAXV,INF);
+	fill(c,c+MAXV,INF);
+	for(int i=0;i<n;i++) pre[i] = i;
+	d[s] = 0;
+	c[s] = 0;
+	for(int i=0;i<n;i++){
+		int u = -1,MIN = INF;
+		for(int j=0;j<n;j++){
+			if(vis[j] == false && d[j] <MIN){
+				u = j;
+				MIN = d[j];
+			}
+		}
+		//找不到小于INF的d[u]，说明剩下的顶点和起点不连通
+		if( u ==-1) return ;
+		vis[u] = true;
+		for(int v= 0;v<n;v++){
+			if(vis[v] == false && G[u][v] !=INF){
+				if(d[u] + G[u][v] <d[v]){
+					d[v] = d[u] +G[u][v];
+					c[v] = c[u] +cost[u][v];
+					pre[v] = u;  
+				} else if(d[u] +G[u][v] == d[v]){
+					if(c[u] +cost[u][v] <c[v]){
+						c[v] = c[u] +cost[u][v];
+						pre[v] = u;
+					}
+				}
+				
+			}
+		} 
+	}
+} 
+
+
+void DFS(int v){
+	if(v == st){
+		printf("%d ",v);
+		return;
+	}
+	DFS(pre[v]);
+	printf("%d ",v);
+}
+
+int main(){
+	scanf("%d %d %d %d",&n,&m,&st,&ed);
+	int u,v;
+	fill(G[0],G[0] + MAXV*MAXV,INF);
+	for(int i=0;i<m;i++){
+		scanf("%d %d",&u,&v);
+		scanf("%d %d",&G[u][v],&cost[u][v]);
+		G[v][u] = G[u][v];
+		cost[v][u] = cost[u][v];
+	}
+	Dijkstra(st);
+	DFS(ed);
+	printf("%d %d\n",d[ed],c[ed]);
+	return 0;
+}
+
+dj +dfs pat a1030
+#include<cstdio> 
+#include<cstring>
+#include<algorithm>
+#include<vector>
+using namespace std;
+const int MAXV = 510;
+const int INF = 10000000;
+int n,m,st,ed,G[MAXV][MAXV],cost[MAXV][MAXV];
+int d[MAXV],minCost =INF;
+bool vis[MAXV] = {false}; 
+vector<int> pre[MAXV];
+vector<int> tempPath , path;
+void Dijkstra(int s){
+	fill(d,d+MAXV,INF);
+	d[s] = 0;
+	for(int i=0;i<n;i++){
+		int u = -1,MIN = INF;
+		for(int j=0;j<n;j++){
+			if(vis[j] == false && d[j] <MIN){
+				u = j;
+				MIN = d[j];
+			}
+		} 
+		if( u ==-1) return ;
+		vis[u] = true;
+		for(int v=0;v<n;v++){
+			if(vis[v] == false && G[u][v] !=INF){
+				if(d[u] +G[u][v] <d[v]){
+					d[v] = d[u] +G[u][v];
+					pre[v].clear();
+					pre[v].push_back(u);
+				}else if(d[u] + G[u][v] == d[v]){
+					pre[v].push_back(u);
+				}
+			}
+		}
+	}
+}
+
+void DFS(int v){
+	if( v == st){
+		tempPath.push_back(v);
+		int tempCost = 0;
+		for(int i= tempPath.size() - 1;i>0;i--){
+			int id = tempPath[i],idNext = tempPath[i-1];
+			tempCost += cost[id][idNext];
+		}
+		if(tempCost < minCost){
+			minCost = tempCost;
+			path = tempPath;
+		}
+		tempPath.pop_back();
+		return ;
+	}
+	tempPath.push_back(v);
+	for(int i=0;i<pre[v].size();i++){
+		DFS(pre[v][i]);
+	}
+	tempPath.pop_back(); 
+} 
+
+
+int main(){
+	scanf("%d %d %d %d",&n,&m,&st,&ed);
+	int u,v;
+	fill(G[0],G[0] +MAXV *MAXV ,INF);
+	fill(cost[0],cost[0] +MAXV * MAXV,INF);
+	for(int i=0;i<m;i++){
+		scanf("%d %d",&u,&v);
+		scanf("%d %d",&G[u][v],&cost[u][v]);
+		G[v][u] = G[u][v];
+		cost[v][u] = cost[u][v]; 
+	}
+	Dijkstra(st);
+	DFS(ed);
+	for(int i=path.size()-1;i>=0;i--){
+		printf("%d ",path[i]);
+	}
+	printf("%d %d\n",d[ed],minCost);
+	return 0;
+}
+//pat a1003 bellman 算法
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+#include<set>
+#include<vector>
+using namespace std;
+const int MAXV = 510;
+const int INF = 0x3fffffff;
+struct Node{
+	int v,dis;
+	Node(int _v,int _dis) : v(_v) , dis(_dis){ //构造函数 
+	}
+};
+vector<Node> Adj[MAXV]; //图G的邻接表
+// n 为顶点数，m为边数，st和ed 分别为起点和终点，weight【】 记录点权
+int n,m,st,ed,weight[MAXV];
+//d[] 记录最短距离，w[]记录最大点权之和，num[]记录最短路径数
+int d[MAXV],w[MAXV],num[MAXV];
+set<int> pre[MAXV]; //前驱
+
+void Bellman(int s){
+	fill(d,d+MAXV,INF);
+	memset(num, 0,sizeof(num));
+	memset(w,0,sizeof(w));
+	d[s] = 0;
+	w[s] = weight[s];
+	num[s] = 1;
+	//以下为求解数组d的部分 
+	for(int i=0;i<n-1;i++){
+		for(int u =0;u<n;u++){
+			for(int j=0;j<Adj[u].size();j++){
+				int v = Adj[u][j].v;
+				int dis = Adj[u][j].dis;
+				if(d[u] + dis < d[v]){
+					d[v] = d[u] +dis;
+					w[v] = w[u] + weight[v];
+					num[v] = num[u];
+					pre[v].clear();
+					pre[v].insert(u); 
+				}else if( d[u] + dis == d[v]){
+					if(w[u] + weight[v] > w[v]){
+						w[v] = w[u] + weight[v]; 
+					}
+					pre[v].insert(u);
+					num[v] = 0;
+					set<int>::iterator it;
+					for(it = pre[v].begin();it != pre[v].end();it++){
+						num[v] +=num[*it];
+					} 
+				}
+			}
+		}
+	} 
+} 
+int main(){
+	scanf("%d %d %d",&n,&m,&st,&ed);
+	for(int i=0;i<n;i++){
+		 scanf("%d",&weight[i]); // 读入点权 
+	}
+	int u,v,wt;
+	for(int i=0;i<m;i++){
+		scanf("%d %d %d",&u,&v,&wt);
+		Adj[u].push_back(Node(v,wt));
+		Adj[u].push_back(Node(u,wt)); 
+	}
+	Bellman(st);
+	printf("%d %d\n",num[ed],w[ed]);
+	return 0;
+}
+
+// floyd 解决全源最短路径问题
+
+#include<cstdio> 
+#include<algorithm>
+using namespace std;
+const int INF = 100000000;
+const int MAXV = 200;
+int n,m; //n为顶点数，m为边数
+int dis[MAXV][MAXV]; //dis[i][j]表示顶点i j之间最短距离
+void floyd(){
+	for(int k=0;k<n;k++){
+		for(int i=0;i<n;i++){
+			for(int j=0;j<n;j++){
+				if(dis[i][k] !=INF && dis[k][j] !=INF && dis[i][k] +dis[k][j] < dis[i][j]){
+					dis[i][j] = dis[i][k] +dis[k][j];
+				}
+			}
+		}
+	}
+} 
+int main(){
+	int u,v,w;
+	fill(dis[0],dis[0]+MAXV*MAXV,INF);
+	scanf("%d %d",&n,&m); //
+	for(int i=0;i<n;i++){
+		dis[i][i] = 0;
+	} 
+	for(int i=0;i<m;i++){
+		scanf("%d %d %d",&u,&v,&w);
+		dis[u][v] = w;//以有向图为例进行过输入 
+	}
+	floyd();
+	for(int i=0;i<n;i++){
+		for(int j=0;j<n;j++){
+			printf("%d ",dis[i][j]);
+		}
+		printf("\n");
+	} 
+	return 0;
+}
+
+/*
+http://codeup.cn/problem.php?cid=100000621&pid=0
+题目描述
+在带权有向图G中，给定一个源点v，求从v到G中的其余各顶点的最短路径问题，叫做单源点的最短路径问题。
+在常用的单源点最短路径算法中，迪杰斯特拉算法是最为常用的一种，是一种按照路径长度递增的次序产生最短路径的算法。
+可将迪杰斯特拉算法描述如下：
+
+在本题中，读入一个有向图的带权邻接矩阵（即数组表示），建立有向图并按照以上描述中的算法求出源点至每一个其它顶点的最短路径长度。
+输入
+输入的第一行包含2个正整数n和s，表示图中共有n个顶点，且源点为s。其中n不超过50，s小于n。
+以后的n行中每行有n个用空格隔开的整数。对于第i行的第j个整数，如果大于0，则表示第i个顶点有指向第j个顶点的有向边，且权值为对应的整数值；如果这个整数为0，则表示没有i指向j的有向边。当i和j相等的时候，保证对应的整数为0。
+输出
+只有一行，共有n-1个整数，表示源点至其它每一个顶点的最短路径长度。如果不存在从源点至相应顶点的路径，输出-1。
+请注意行尾输出换行。
+样例输入 Copy
+4 1
+0 3 0 1
+0 0 4 0
+2 0 0 0
+0 0 1 0
+样例输出 Copy
+6 4 7 
+提示
+在本题中，需要按照题目描述中的算法完成迪杰斯特拉算法，并在计算最短路径的过程中将每个顶点是否可达记录下来，直到求出每个可达顶点的最短路径之后，算法才能够结束。
+迪杰斯特拉算法的特点是按照路径长度递增的顺序，依次添加下一条长度最短的边，从而不断构造出相应顶点的最短路径。
+另外需要注意的是，在本题中为了更方便的表示顶点间的不可达状态，可以使用一个十分大的值作为标记。
+*/
+#include<cstdio>
+#include<algorithm>
+#include<queue>
+#include<stack>
+using namespace std;
+const int maxn = 510;
+const int inf = 0x3fffffff;
+int n,s,m;
+int G[maxn][maxn];
+bool vis[maxn] = {false};
+int d[51];
+
+void dijkstra(int s){
+	fill(d,d+maxn,inf);
+	d[s] = 0;
+	for(int i=0;i<n;i++){
+		int u=-1,MIN = inf;
+		for(int j=0;j<n;j++){
+			if(vis[j] == false && d[j]<MIN){
+				u = j;
+				MIN = d[j];
+			}
+		}
+		if( u == -1) return ;
+		vis[u] = true;
+		for(int v=0;v<n;v++){
+			if( vis[v] == false && G[u][v] !=0 && d[u] +G[u][v] <d[v]){
+				d[v] = d[u] +G[u][v];
+			}
+		}
+	}
+}
+
+int main(){
+	int i,j,k;
+	scanf("%d %d",&n,&s);
+	for(i=0;i<n;i++){
+		for(j=0;j<n;j++){
+			scanf("%d",&G[i][j]);
+		}
+	}
+	dijkstra(s);
+	for(i=0;i<n;i++){
+		if( i != s){
+			if( d[i] ==inf){
+				printf("-1 ");
+			}else{
+				printf("%d ",d[i]);
+			}
+		}
+	}
+	printf("\n");
+	return 0;
+}
+/*
+http://codeup.cn/problem.php?cid=100000621&pid=1
+题目描述
+在带权有向图G中，求G中的任意一对顶点间的最短路径问题，也是十分常见的一种问题。
+解决这个问题的一个方法是执行n次迪杰斯特拉算法，这样就可以求出每一对顶点间的最短路径，执行的时间复杂度为O(n3)。
+而另一种算法是由弗洛伊德提出的，时间复杂度同样是O(n3)，但算法的形式简单很多。
+可以将弗洛伊德算法描述如下：
+
+在本题中，读入一个有向图的带权邻接矩阵（即数组表示），建立有向图并按照以上描述中的算法求出每一对顶点间的最短路径长度。
+
+输入
+输入的第一行包含1个正整数n，表示图中共有n个顶点。其中n不超过50。
+以后的n行中每行有n个用空格隔开的整数。对于第i行的第j个整数，如果大于0，则表示第i个顶点有指向第j个顶点的有向边，且权值为对应的整数值；如果这个整数为0，则表示没有i指向j的有向边。当i和j相等的时候，保证对应的整数为0。
+输出
+共有n行，每行有n个整数，表示源点至每一个顶点的最短路径长度。如果不存在从源点至相应顶点的路径，输出-1。对于某个顶点到其本身的最短路径长度，输出0。
+请在每个整数后输出一个空格，并请注意行尾输出换行。
+样例输入 Copy
+4
+0 3 0 1
+0 0 4 0
+2 0 0 0
+0 0 1 0
+样例输出 Copy
+0 3 2 1 
+6 0 4 7 
+2 5 0 3 
+3 6 1 0 
+提示
+在本题中，需要按照题目描述中的算法完成弗洛伊德算法，并在计算最短路径的过程中将每个顶点是否可达记录下来，直到求出每一对顶点的最短路径之后，算法才能够结束。
+相对于迪杰斯特拉算法，弗洛伊德算法的形式更为简单。通过一个三重循环，弗洛伊德算法可以方便的求出每一对顶点间的最短距离。
+另外需要注意的是，为了更方便的表示顶点间的不可达状态，可以使用一个十分大的值作为标记。而在题目描述中的算法示例使用了另外一个三维数组对其进行表示，这使原本的O(n3)时间复杂度增长到了O(n4)，这也是需要自行修改的部分。
+*/
+
+
+#include<algorithm>
+#include<cstdio>
+using namespace std;
+const int MAXV = 510;
+const int INF  = 0x3fffffff;
+int n;
+int dis[MAXV][MAXV];
+void floyd(){
+	for(int k=0;k<n;k++){
+		for(int i=0;i<n;i++){
+			for(int j=0;j<n;j++){
+				if(dis[i][k] != INF && dis[k][j] !=INF && dis[i][k] + dis[k][j] <dis[i][j]){
+					dis[i][j] = dis[i][k] + dis[k][j];
+				}
+			}
+		}
+	}
+}
+
+int main(){
+	fill(dis[0], dis[0]+MAXV*MAXV, INF);
+	scanf("%d",&n);
+	for(int i=0;i<n;i++){
+		for(int j=0;j<n;j++){
+			scanf("%d",&dis[i][j]);
+			if(i != j){
+				if(dis[i][j] ==0){
+					dis[i][j] =INF;
+				}
+			}
+		}
+	}
+	floyd();
+	for(int i=0;i<n;i++){
+		for(int j=0;j<n;j++){
+			if(dis[i][j] == INF) printf("-1 ");
+			else printf("%d ",dis[i][j]);
+		}
+		printf("\n");
+	} 
+	return 0;
+}
+/*  http://codeup.cn/problem.php?cid=100000621&pid=2
+题目描述
+N个城市，标号从0到N-1，M条道路，第K条道路（K从0开始）的长度为2^K，求编号为0的城市到其他城市的最短距离。
+
+输入
+第一行两个正整数N（2<=N<=100）M(M<=500),表示有N个城市，M条道路，
+接下来M行两个整数，表示相连的两个城市的编号。
+
+输出
+N-1行，表示0号城市到其他城市的最短路，如果无法到达，输出-1，数值太大的以MOD 100000 的结果输出。
+
+样例输入 Copy
+4 3
+0 1
+1 2
+2 0
+样例输出 Copy
+1
+3
+-1
+*/
+
+#include<cstdio> 
+using namespace std;
+const int maxn = 100;
+int dis[maxn][maxn];
+int tree[maxn];
+int findroot(int x){
+	//用于判断是否在一个集合
+	if(tree[x] == -1 )  return x;
+	else {
+		tree[x] = findroot(tree[x]);
+		return tree[x]; 
+	} 
+} 
+
+int mod(int x,int y){
+	int ret = 1;
+	while(y--){
+		ret =(ret *x) % 100000;
+	}
+	return ret;
+}
+int main(){
+	int n,m,a,b,x,y,dist;
+	while( scanf("%d %d",&n,&m) !=EOF){
+		for(int i=0;i<n;i++){
+			tree[i] = -1;
+			for(int j=0;j<n;j++){
+				dis[i][j] = -1;
+			}
+			dis[i][i] =0;
+		}
+		for(int i=0;i<m;i++){
+			scanf("%d %d",&a,&b);
+			x =findroot(a);
+			y = findroot(b);
+			if( x != y){
+				dist = mod(2,i);
+				for(int j=0;j<n;j++){
+					if( x == findroot(j)){
+						for(int k=0;k<n;k++){
+							if( y ==findroot(k)){
+								dis[j][k] = dis[k][j] =(dis[j][a] + dist + dis[b][k])% 100000;
+							}
+						}
+					}
+				}
+				tree[y] = x; 
+			}
+		}
+		x= findroot(x);
+		for(int i=1;i<n;i++){
+			printf("%d\n",dis[0][i]);
+		}
+		
+	}
+	return 0;
+}
+
+#include <cstring>
+#include <cstdio>
+#include <queue>
+using namespace std;
+#define maxn 1008
+int W[maxn][maxn];
+int Wc[maxn][maxn];
+int dis[maxn];
+int cost[maxn];
+inline int min(int a,int b)
+{
+	return a>b?b:a;
+}
+int main()
+{
+	int n,m;
+	while(scanf("%d%d",&n,&m)==2 &&(n||m))
+	{
+		memset(W,0x3f,sizeof(W));
+		memset(dis,0x3f,sizeof(dis));
+		memset(cost,0x3f,sizeof(cost));
+		memset(Wc,0x3f,sizeof(Wc));
+		for(int i=1;i<=m;i++)
+		{
+			int a,b,d,p;
+			scanf("%d%d%d%d",&a,&b,&d,&p);
+			if(W[a][b] > d)
+			{
+				W[a][b] = W[b][a] = d;
+				Wc[a][b] = Wc[b][a] = p;
+			}
+			else if(W[a][b] == d)
+			Wc[a][b] = Wc[b][a] = min(Wc[a][b],p);
+		}
+		queue <int> q;
+		int s,t;
+		scanf("%d%d",&s,&t);
+		dis[s] = cost[s] = 0;
+		q.push(s);
+		while(!q.empty())///////等下如果超时就用邻接表
+		{
+			int p = q.front();
+			q.pop();
+			for(int i=1;i<=n;i++)
+			{
+				if(dis[p] + W[p][i] < dis[i] || (dis[p] + W[p][i] == dis[i] && cost[p] + Wc[p][i] < cost[i]))
+				{
+					dis[i] = dis[p] + W[p][i];
+					cost[i] = cost[p] + Wc[p][i];
+					q.push(i);
+				}
+			}
+		}
+		printf("%d %d\n",dis[t],cost[t]);
+	}
+	return 0;
+}
+
+
+// prim 最小生成树 
+/*
+输入： 
+6 10
+0 1 4
+0 4 1
+0 5 2
+1 2 6
+1 5 3
+2 3 6
+2 5 5
+3 4 4
+3 5 5
+4 5 3
+输出： 
+15
+
+*/
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int MAXV = 1000;
+const int INF = 10000000;
+int n,m,G[MAXV][MAXV]; //n 为顶点数 m为边数，
+int d[MAXV]; //顶点和集合 s 的距离
+bool vis[MAXV] = {false}; //标记数组
+
+int prim(){
+	fill(d, d+MAXV,INF); //初始化
+	d[0]=0;
+	int ans = 0;//存最小生成树 边权之和 
+	for(int i=0;i<n;i++){
+		int u= -1 , MIN = INF;
+		for(int j=0;j<n;j++){
+			if(vis[j] == false && d[j]<MIN){
+				u = j;
+				MIN = d[j];
+			}
+		}
+			//找不到 小于inf 则剩下的不连通
+		if(u == -1) return -1;
+		vis[u] = true;
+		ans += d[u]; //把集合最小的边加入最小生成树 
+		for(int v = 0;v<n;v++){
+			//v 未访问 && u能到达v && 以u为中介点可以使v离集合s更近
+			if(vis[v] == false && G[u][v] != INF && G[u][v] < d[v]){
+				d[v] = G[u][v];
+			} 
+		} 
+	}
+	return ans;
+	
+} 
+int main(){
+	int u,v,w;
+	scanf("%d %d",&n,&m);	
+	fill(G[0],G[0]+MAXV*MAXV,INF);
+	for(int i=0;i<m;i++){
+		scanf("%d %d %d",&u,&v,&w);
+		G[u][v] = G[v][u] = w;//无向图 
+	}
+	int ans = prim();
+	printf("%d\n",ans); 
+	return 0;
+	
+}
+
+///*prim http://codeup.cn/problem.php?cid=100000622&pid=0
+题目描述
+        某省调查乡村交通状况，得到的统计表中列出了任意两村庄间的距离。省政府“畅通工程”的目标是使全省任何两个村庄间都可以实现公路交通（但不一定有直接的公路相连，只要能间接通过公路可达即可），并要求铺设的公路总长度为最小。请计算最小的公路总长度。
+
+输入
+        测试输入包含若干测试用例。每个测试用例的第1行给出村庄数目N ( < 100 )；随后的N(N-1)/2行对应村庄间的距离，每行给出一对正整数，分别是两个村庄的编号，以及此两村庄间的距离。为简单起见，村庄从1到N编号。
+        当N为0时，输入结束，该用例不被处理。
+
+输出
+        对每个测试用例，在1行里输出最小的公路总长度。
+
+样例输入 Copy
+8
+1 2 42
+1 3 68
+1 4 35
+1 5 1
+1 6 70
+1 7 25
+1 8 79
+2 3 59
+2 4 63
+2 5 65
+2 6 6
+2 7 46
+2 8 82
+3 4 28
+3 5 62
+3 6 92
+3 7 96
+3 8 43
+4 5 28
+4 6 37
+4 7 92
+4 8 5
+5 6 3
+5 7 54
+5 8 93
+6 7 83
+6 8 22
+7 8 17
+0
+样例输出 Copy
+82
+
+*/
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int MAXV = 1000;
+const int INF = 1000000;
+int n,m,G[MAXV][MAXV]; //n 为顶点数 m为边数，
+int d[MAXV]; //顶点和集合 s 的距离
+bool vis[MAXV]; //标记数组 
+
+int prim(){
+	fill(d, d+MAXV,INF); //初始化
+	d[1]=0;
+	int ans = 0;//存最小生成树 边权之和 
+	for(int i=1;i<=n;i++){
+		int u= -1 , MIN = INF;
+		for(int j=1;j<=n;j++){
+			if(vis[j] == false && d[j]<MIN){
+				u = j;
+				MIN = d[j];
+			}
+		}
+			//找不到 小于inf 则剩下的不连通
+		if(u == -1) return -1;
+		vis[u] = true;
+		ans += d[u]; //把集合最小的边加入最小生成树 
+		for(int v = 1;v<=n;v++){
+			//v 未访问 && u能到达v && 以u为中介点可以使v离集合s更近
+			if(vis[v] == false && G[u][v] != INF && G[u][v] < d[v]){
+				d[v] = G[u][v];
+			} 
+		} 
+	}
+	return ans;
+	
+} 
+int main(){
+	int u,v,w;
+	while(scanf("%d",&n) !=EOF && n){
+		fill(G[0],G[0]+MAXV*MAXV,INF);
+		fill(vis,vis+MAXV,false);
+		for(int i=0;i< n*(n-1)/2 ;i++){
+			scanf("%d %d %d",&u,&v,&w);
+			G[u][v] = G[v][u] = w;//无向图 
+		}
+		int ans = prim();
+		printf("%d\n",ans); 
+	}	
+	
+	return 0;
+	
+}
+
+/* http://codeup.cn/problem.php?cid=100000622&pid=2
+省政府“畅通工程”的目标是使全省任何两个村庄间都可以实现公路交通（但不一定有直接的公路相连，只要能间接通过公路可达即可）。经过调查评估，得到的统计表中列出了有可能建设公路的若干条道路的成本。现请你编写程序，计算出全省畅通需要的最低成本。
+
+输入
+测试输入包含若干测试用例。每个测试用例的第1行给出评估的道路条数 N、村庄数目M (N, M < =100 )；随后的 N 行对应村庄间道路的成本，每行给出一对正整数，分别是两个村庄的编号，以及此两村庄间道路的成本（也是正整数）。为简单起见，村庄从1到M编号。当N为0时，全部输入结束，相应的结果不要输出。
+
+输出
+对每个测试用例，在1行里输出全省畅通需要的最低成本。若统计数据不足以保证畅通，则输出“?”。
+
+样例输入 Copy
+3 4
+1 2 1
+2 3 2
+3 4 3
+2 4
+1 2 1
+3 4 2
+0 5
+样例输出 Copy
+6
+?
+
+*/
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int MAXV  = 110;
+const int INF  = 10000000;
+struct edge{
+	int u,v;
+	int cost;
+}E[MAXV];
+bool cmp(edge a,edge b){
+	return a.cost <b.cost;
+} 
+//并查集部分
+int father[MAXV];
+int findfather( int x){
+	int a =x ;
+	while( x != father[x]){
+		x = father[x];
+	} 
+	while( a != father[a]){
+		int z = a;
+		a = father[a];
+		father[z] = x;
+	}
+	return x;
+} 
+
+int kruskal(int n,int m){
+	int ans = 0,num_edge = 0;
+	for(int i=0; i< m ; i++){
+		father[i] = i;
+	}
+	sort(E,E+n,cmp);
+	for(int i=0;i<n;i++){
+		int fau =findfather(E[i].u);
+		int fav = findfather(E[i].v);
+		if( fau != fav){
+			father[fau] = fav;
+			ans +=E[i].cost;
+			num_edge++;
+			if(num_edge == m-1) break;
+		}
+	}
+	if(num_edge != m-1)  return -1;
+	else return ans;
+	return ans;
+}
+int main(){
+	int n,m;
+	while( scanf("%d %d",&n,&m) !=EOF){
+		if(  n == 0) break;
+		for(int i=0;i<n;i++){
+			scanf("%d %d %d",&E[i].u,&E[i].v,&E[i].cost);
+		}
+		int ans = kruskal(n,m);
+		if( ans!= -1) printf("%d\n",ans);
+		else printf("?\n");
+	}
+	return 0;
+}
+
+/*
+题目描述   http://codeup.cn/problem.php?cid=100000622&pid=3
+省政府“畅通工程”的目标是使全省任何两个村庄间都可以实现公路交通（但不一定有直接的公路相连，只要能间接通过公路可达即可）。现得到城镇道路统计表，表中列出了任意两城镇间修建道路的费用，以及该道路是否已经修通的状态。现请你编写程序，计算出全省畅通需要的最低成本。
+
+输入
+测试输入包含若干测试用例。每个测试用例的第1行给出村庄数目N ( 1< N < 100 )；随后的 N(N-1)/2 行对应村庄间道路的成本及修建状态，每行给4个正整数，分别是两个村庄的编号（从1编号到N），此两村庄间道路的成本，以及修建状态：1表示已建，0表示未建。
+
+当N为0时输入结束。
+
+输出
+每个测试用例的输出占一行，输出全省畅通需要的最低成本。
+
+样例输入 Copy
+4
+1 2 1 1
+1 3 6 0
+1 4 2 1
+2 3 3 0
+2 4 5 0
+3 4 4 0
+3
+1 2 1 1
+2 3 2 1
+1 3 1 0
+0
+样例输出 Copy
+3
+0
+*/
+
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int MAXV = 102;
+const int MAXE = 10001;
+struct edge{
+	int u,v;
+	int cost;
+}E[MAXE];
+bool cmp(edge a,edge b){
+	return a.cost < b.cost;
+}
+int father[MAXV];
+int findfather(int x){
+	int a= x;
+	while( x != father[x]){
+		x = father[x];
+	}
+	while( a != father[a]){
+		int z = a;
+		a= father[a];
+		father[z] = a;
+	}
+	return x;
+} 
+//kruskal 部分，返回最小生成树的边权之和，参数n 为顶点个数，m为图的边数
+int kruskal(int n,int m){
+	//ans 为所求边权之和，num_edge为当前生成树的边数
+	int ans = 0,num_edge = 0;
+	for(int i=0;i<n;i++){
+		father[i] = i;
+	} 
+	sort(E,E+m,cmp);
+	for(int i=0;i<m;i++){
+		int fau = findfather(E[i].u);
+		int fav = findfather(E[i].v);
+		if( fau != fav){
+			father[fau] = fav;
+			ans +=E[i].cost;
+			num_edge++;
+			if(num_edge == n-1) break;
+		}
+	}
+	if(num_edge != n-1) return -1;
+	else return ans;
+} 
+int main(){
+	int n;
+	int a,b;
+	while( scanf("%d",&n) !=EOF && n){
+		for(int i=0;i< n*(n-1)/2 ;i++){
+			scanf("%d %d %d %d",&E[i].u,&E[i].v,&a,&b);
+			if(b == 0) E[i].cost = a;
+			else E[i].cost = 0;
+		}
+		int ans = kruskal(n, n*(n-1)/2);
+		printf("%d\n",ans);
+	}
+	return 0;
+}
+
+
+/*
+题目描述
+
+   
+
+    The Head Elder of the tropical island of Lagrishan has a problem. A burst of foreign aid money was spent on extra roads between villages some years ago. But the jungle overtakes roads relentlessly, so the large road network is too expensive to maintain. The Council of Elders must choose to stop maintaining some roads. The map above on the left shows all the roads in use now and the cost in aacms per month to maintain them. Of course there needs to be some way to get between all the villages on maintained roads, even if the route is not as short as before. The Chief Elder would like to tell the Council of Elders what would be the smallest amount they could spend in aacms per month to maintain roads that would connect all the villages. The villages are labeled A through I in the maps above. The map on the right shows the roads that could be maintained most cheaply, for 216 aacms per month. Your task is to write a program that will solve such problems.
+
+
+输入
+The input consists of one to 100 data sets, followed by a final line containing only 0. Each data set starts with a line containing only a number n, which is the number of villages, 1 < n < 27, and the villages are labeled with the first n letters of the alphabet, capitalized. Each data set is completed with n-1 lines that start with village labels in alphabetical order. There is no line for the last village. Each line for a village starts with the village label followed by a number, k, of roads from this village to villages with labels later in the alphabet. If k is greater than 0, the line continues with data for each of the k roads. The data for each road is the village label for the other end of the road followed by the monthly maintenance cost in aacms for the road. Maintenance costs will be positive integers less than 100. All data fields in the row are separated by single blanks. The road network will always allow travel between all the villages. The network will never have more than 75 roads. No village will have more than 15 roads going to other villages (before or after in the alphabet). In the sample input below, the first data set goes with the map above.
+
+输出
+The output is one integer per line for each data set: the minimum cost in aacms per month to maintain a road system that connect all the villages. Caution: A brute force solution that examines every possible set of roads will not finish within the one minute time limit.
+
+样例输入 Copy
+3
+A 1 B 42
+B 1 C 87
+6
+A 2 B 13 E 55
+B 1 C 1
+C 1 D 20
+D 1 E 4
+E 1 F 76
+0
+样例输出 Copy
+129
+114
+
+*/
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int MAXV = 100;
+const int MAXE = 10010;
+struct edge{
+	int u,v;
+	int cost;
+}E[MAXE]; 
+
+bool cmp(edge a,edge b){
+	return a.cost < b.cost;
+}
+int father[MAXV];
+int findfather(int x){
+	int a = x;
+	while( x != father[x]){
+		x= father[x];
+	}
+	//路径压缩
+	while( a != father[a]){
+		int z = a;
+		a = father[a];
+		father[z] = x;
+	} 
+	return x;
+}
+//kruskal 部分，返回最小生成树的边权之和，参数n 为顶点个数，m为图的边数
+int kruskal(int n,int m){
+	//ans 为所求边权之和，num_edge为当前生成树的边数
+	int ans = 0,num_edge = 0;
+	for(int i=0;i<n;i++){
+		father[i] = i;
+	} 
+	sort(E,E+m,cmp);
+	for(int i=0;i<m;i++){
+		int fau = findfather(E[i].u);
+		int fav = findfather(E[i].v);
+		if( fau != fav){
+			father[fau] = fav;
+			ans +=E[i].cost;
+			num_edge++;
+			if(num_edge == n-1) break;
+		}
+	}
+	if(num_edge != n-1) return -1;
+	else return ans;
+} 
+int main(){
+	int n,cost,m,k;
+	char a,b;
+	while( scanf("%d",&n) !=EOF && n){
+		k=0;
+		for(int i=0;i<n-1;i++){
+			cin>>a >> m;
+			for(int j=0;j<m;j++){
+				cin>> b >> cost;
+				E[k].u = a- '@';
+				E[k].v = b- '@';
+				E[k].cost = cost;
+				k++;
+			}
+		}
+		int ans = kruskal(n,k);
+		printf("%d\n",ans);
+	}
+	return 0;
+}
+
+
+// topsort  http://codeup.cn/problem.php?cid=100000623&pid=0
+#include<algorithm>
+#include<cstdio>
+#include<vector>
+#include<stack>
+using namespace std;
+const int MAXV = 100;
+vector<int> G[MAXV];
+int n,m,inDegree[MAXV];
+bool toplogicalSort(){
+	int num = 0; //记录加入拓扑序列的顶点数
+	stack<int> q; 
+	vector<int> p;
+	for(int i=0;i<n;i++){
+		if(inDegree[i] == 0){
+			q.push(i);
+		}
+	}
+	while( !q.empty() ) {
+		int u = q.top();
+		p.push_back(u);
+		q.pop();
+		for(int i=0;i<G[u].size();i++){
+			int v= G[u][i];
+			inDegree[v]--;
+			if(inDegree[v] == 0){
+				q.push(v);
+			}
+		}
+		G[u].clear();
+		num++;
+	}
+	if(num == n){
+		for(int i=0;i<p.size();i++){
+			printf("%d ",p[i]);
+		}
+	}else{
+		printf("ERROR");
+	}
+}
+int main(){
+	fill(inDegree,inDegree+MAXV,0);
+	scanf("%d %d",&n,&m);
+	for(int i=0;i<n;i++){
+		for(int j=0;j<n;j++){
+			int k;
+			scanf("%d",&k);
+			if( k==1 && i != j){
+				inDegree[j]++;
+				G[i].push_back(j); 
+			}
+		}
+	}
+	toplogicalSort();
+	printf("\n");
+	return 0; 
+}
+
+
+/*
+题目描述
+有N个比赛队（1<=N<=500），编号依次为1，2，3，。。。。，N进行比赛，比赛结束后，裁判委员会要将所有参赛队伍从前往后依次排名，但现在裁判委员会不能直接获得每个队的比赛成绩，只知道每场比赛的结果，即P1赢P2，用P1，P2表示，排名时P1在P2之前。现在请你编程序确定排名。
+
+输入
+输入有若干组，每组中的第一行为二个数N（1<=N<=500），M；其中N表示队伍的个数，M表示接着有M行的输入数据。接下来的M行数据中，每行也有两个整数P1，P2表示即P1队赢了P2队。
+
+输出
+
+给出一个符合要求的排名。输出时队伍号之间有空格，最后一名后面没有空格。
+其他说明：符合条件的排名可能不是唯一的，此时要求输出时编号小的队伍在前；输入数据保证是正确的，即输入数据确保一定能有一个符合要求的排名。
+
+样例输入 Copy
+3 2
+3 1
+3 2
+17 16
+16 1
+13 2
+7 3
+12 4
+12 5
+17 6
+10 7
+11 8
+11 9
+16 10
+13 11
+15 12
+15 13
+17 14
+17 15
+17 16
+0 0
+样例输出 Copy
+3 1 2
+17 6 14 15 12 4 5 13 2 11 8 9 16 1 10 7 3
+
+*/
+#include<cstdio>
+#include<algorithm>
+#include<iostream>
+using namespace std;
+const int MAXV = 550;
+int G[MAXV][MAXV];
+int inDegree[MAXV];
+int topsort(int n){
+	int num = 0;
+	for(int i=1;i<=n;i++){
+		for(int j=1;j<=n;j++){
+			if(inDegree[j] == 0){
+				num++;
+				inDegree[j]--;
+				if(num == n){
+					printf("%d\n",j);
+				}else{
+					printf("%d ",j);
+				}
+				for(int k=1;k<=n;k++){
+					if(G[j][k]){
+						inDegree[k]--;
+					}
+				}
+				break;
+			}
+		}
+	}
+	return 0;
+}
+
+int main(){
+	int n,m,a,b;
+	while( scanf("%d %d",&n,&m) !=EOF &&n+m){
+		fill(inDegree,inDegree+MAXV,0);
+		fill(G[0],G[0]+MAXV*MAXV,0);
+		while(m--){
+			scanf("%d %d",&a,&b);
+			getchar();
+			if( !G[a][b]){
+				G[a][b] =1;
+				inDegree[b]++;
+			}
+		}
+		topsort(n);
+	}
+	return 0;
+}
+
+
+/*
+题目描述
+ACM-DIY is a large QQ group where many excellent acmers get together. It is so harmonious that just like a big family. Every day,many "holy cows" like HH, hh, AC, ZT, lcc, BF, Qinz and so on chat on-line to exchange their ideas. When someone has questions, many warm-hearted cows like Lost will come to help. Then the one being helped will call Lost "master", and Lost will have a nice "prentice". By and by, there are many pairs of "master and prentice". But then problem occurs: there are too many masters and too many prentices, how can we know whether it is legal or not?We all know a master can have many prentices and a prentice may have a lot of masters too, it's legal. Nevertheless，some cows are not so honest, they hold illegal relationship. Take HH and 3xian for instant, HH is 3xian's master and, at the same time, 3xian is HH's master,which is quite illegal! To avoid this,please help us to judge whether their relationship is legal or not. Please note that the "master and prentice" relation is transitive. It means that if A is B's master ans B is C's master, then A is C's master.
+
+输入
+The input consists of several test cases. For each case, the first line contains two integers, N (members to be tested) and M (relationships to be tested)(2 <= N, M <= 100). Then M lines follow, each contains a pair of (x, y) which means x is y's master and y is x's prentice. The input is terminated by N = 0.TO MAKE IT SIMPLE, we give every one a number (0, 1, 2,..., N-1). We use their numbers instead of their names.
+
+输出
+For each test case, print in one line the judgement of the messy relationship.If it is legal, output "YES", otherwise "NO".
+
+样例输入 Copy
+4 3
+0 1
+1 2
+2 3
+3 3
+0 1
+1 2
+2 0
+0 1
+样例输出 Copy
+YES
+NO
+*/
+
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int MAXV  = 550;
+int G[MAXV][MAXV];
+int indegree[MAXV];
+int topsort(int n){
+	int num=0;
+	for(int i=0;i<n;i++){
+		for(int j=0;j<n;j++){
+			if(indegree[j] == 0){
+				num++;
+				indegree[j]--;
+				for(int k=0;k<n;k++){
+					if(G[j][k] != 0){
+						indegree[k]--;
+					}
+				}
+				break;
+			}
+		}
+	}
+	if(num == n) printf("YES\n");
+	else printf("NO\n");
+	return 0;
+}
+int main(){
+	int n,m,a,b;
+	while( scanf("%d %d",&n,&m) !=EOF){
+		if( n == 0 ) break;
+		fill(G[0],G[0]+MAXV*MAXV,0);
+		fill(indegree,indegree+MAXV,0);
+		while(m--){
+			scanf("%d %d",&a,&b);
+			if(!G[a][b]){
+				G[a][b] = 1;
+				indegree[b]++;
+			} 
+		}
+		topsort(n);
+	}
+	return 0;
+}
+
+/*题目描述
+描述：
+
+    图的连接边上的数据表示其权值，带权值的图称作网。
+
+
+
+
+上图可描述为顶点集为（a,b,c,d,e)
+
+边集及其权值为(始点，终点 权值）：a b 3
+
+    a c 2 
+
+    b d 5
+
+    c d 7
+
+                                                     c e 4
+
+                                                     d e 6            
+
+  网的源点是入度为0的顶点，汇点是出度为0的顶点。网的关键路径是指从源点到汇点的所有路径中，具有最大路径长度的路径。上图中的关键路径为a->c->d->e，其权值之和为关键路径的长度为15。
+
+  本题的要求是根据给出的网的邻接矩阵求该网的关键路径及其长度。
+
+
+输入
+第一行输入一个正整数n（1<=n<=5)，其代表测试数据数目，即图的数目
+
+第二行输入x(1<=x<=15)代表顶点个数，y(1<=y<=19)代表边的条数
+
+第三行给出图中的顶点集，共x个小写字母表示顶点
+
+接下来每行给出一条边的始点和终点及其权值，用空格相隔，每行代表一条边。
+输出
+第一个输出是图的关键路径（用给出的字母表示顶点， 用括号将边括起来，顶点逗号相隔）
+
+第二个输出是关键路径的长度
+
+每个矩阵对应上面两个输出，两个输出在同一行用空格间隔，每个矩阵的输出占一行。
+
+
+样例输入 Copy
+2
+5 6
+abcde
+a b 3
+a c 2
+b d 5
+c d 7
+c e 4
+d e 6
+4 5
+abcd
+a b 2
+a c 3
+a d 4
+b d 1
+c d 3
+样例输出 Copy
+(a,c) (c,d) (d,e) 15
+(a,c) (c,d) 6
+
+*/
+#include <iostream>
+#include <algorithm>
+#include <map>
+#include <string>
+#include <vector>
+#include <stack>
+#include <queue>
+using namespace std;
+const int MAX_SIZE = 16;
+const int INF = 0x3fffffff;
+stack<int> s;
+bool hasChar[MAX_SIZE] = {false};
+map<char, char> path;
+vector<int> fa;
+int n, x, y, gra[MAX_SIZE][MAX_SIZE], indeg[MAX_SIZE] = {0}, ve[MAX_SIZE], vl[MAX_SIZE], maxi;
+bool topologicalSort()
+{
+    queue<int> q;
+    while (!s.empty())
+        s.pop();
+    fill(ve, ve + MAX_SIZE, 0);
+    for (int i = 0; i < MAX_SIZE; i++)
+    {
+        if (hasChar[i] && indeg[i] == 0)
+        {
+            fa.push_back(i);
+            q.push(i);
+        }
+    }
+    int number = 0, u;
+    while (!q.empty())
+    {
+        u = q.front();
+        q.pop();
+        for (int i = 0; i < MAX_SIZE; i++)
+        {
+            if (hasChar[i] && gra[u][i] != INF)
+            {
+                indeg[i]--;
+                if (indeg[i] == 0)
+                    q.push(i);
+                if (ve[u] + gra[u][i] > ve[i])
+                    ve[i] = ve[u] + gra[u][i];
+            }
+        }
+        number++;
+        s.push(u);
+    }
+    fill(vl, vl + MAX_SIZE, ve[u]);
+    maxi = ve[u];
+    if (number == n)
+        return true;
+    return false;
+}
+void criticalPath()
+{
+    path.clear();
+    while (!s.empty())
+    {
+        int u = s.top();
+        s.pop();
+        for (int i = 0; i < MAX_SIZE; i++)
+            if (gra[i][u] != INF && hasChar[i] && (vl[i] > vl[u] - gra[i][u]))
+                vl[i] = vl[u] - gra[i][u];
+    }
+ 
+    for (int i = 0; i < MAX_SIZE; i++)
+    {
+        for (int j = 0; j < MAX_SIZE; j++)
+        {
+            if (gra[i][j] != INF)
+            {
+                int e = ve[i], l = vl[j] - gra[i][j];
+                if (e == l)
+                {
+                    char a = 'a' + i, b = 'a' + j;
+                    path[a] = b;
+                }
+            }
+        }
+    }
+    char start;
+    for (int i = 0; i < fa.size(); i++)
+    {
+        start = 'a' + fa[i];
+        if (path.find(start) != path.end())
+            break;
+    }
+    char tmp;
+    while (true)
+    {
+        if (path.find(start) != path.end())
+        {
+            tmp = path[start];
+            cout << "(" << start << "," << tmp << ") ";
+            start = tmp;
+        }
+        else
+            break;
+    }
+    cout << maxi << endl;
+}
+int main()
+{
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(0);
+    cin >> n;
+    char ta, tb;
+    for (int i = 0; i < n; i++)
+    {
+        string a;
+        int len;
+        fill(gra[0], gra[0] + 256, INF);
+        fill(hasChar, hasChar + MAX_SIZE, false);
+        fill(indeg, indeg + MAX_SIZE, false);
+        cin >> x >> y >> a;
+        for (int j = 0; j < y; j++)
+        {
+            cin >> ta >> tb >> len;
+            hasChar[ta - 'a'] = true;
+            hasChar[tb - 'a'] = true;
+            gra[ta - 'a'][tb - 'a'] = len;
+            indeg[tb - 'a']++;
+        }
+ 
+        topologicalSort();
+        criticalPath();
+    }
+    return 0;
+}
