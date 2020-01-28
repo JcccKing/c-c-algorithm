@@ -1,2 +1,2 @@
 # c-c-algorithm  考研复试 资料 
-PAT hdoj codeup and so on. test in 算法笔记 每个章节 对应习题
+PAT hdoj codeup 每个算法 对应 部分习题思路和AC答案
