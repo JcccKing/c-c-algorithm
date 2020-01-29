@@ -1,0 +1,1283 @@
+/*
+动态规划 入门  数塔问题 
+输入
+5
+5
+8 3
+12 7 16
+4 10 11 6
+9 5 3 9 4
+输出
+44 
+*/ 
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn = 1000;
+int f[maxn][maxn],dp[maxn][maxn];
+int main(){
+	int n;
+	scanf("%d",&n);
+	for(int i=1;i<=n;i++){
+		for(int j=1;j<=i;j++){
+			scanf("%d",&f[i][j]); 
+		} 
+	}
+	//边界
+	for(int j=1;j<=n;j++){
+		dp[n][j] = f[n][j];
+	} 
+	//从n-1层开始往上计算dp[i][j]
+	for(int i=n-1;i>=1;i--){
+		for(int j=0;j<=i;j++){
+			//状态转移方程
+			dp[i][j] = max(dp[i+1][j], dp[i+1][j+1]) +f[i][j]; 
+		}
+	} 
+	printf("%d\n",dp[1][1]);
+	return 0;
+} 
+/*
+题目描述   http://codeup.cn/problem.php?cid=100000625&pid=0
+The Fibonacci Numbers{0,1,1,2,3,5,8,13,21,34,55...} are defined by the recurrence:
+F0=0 F1=1 Fn=Fn-1+Fn-2,n>=2
+Write a program to calculate the Fibonacci Numbers.
+
+输入
+Each case contains a number n and you are expected to calculate Fn.(0<=n<=30) 。
+
+输出
+For each case, print a number Fn on a separate line,which means the nth Fibonacci Number.
+
+样例输入 Copy
+1
+样例输出 Copy
+1
+
+*/ 
+#include<cstdio>
+using namespace std;
+typedef long long int LL;
+int main()
+{
+   LL f[31];
+   f[0] = 0;
+   f[1] = 1;
+   f[2] = 1;
+   for(int i=3; i<=30; i++)
+        f[i] = f[i-1] + f[i-2];
+   int n;
+   while(scanf("%d",&n)!=EOF)
+   {
+       printf("%d\n", f[n]);
+   }
+   return 0;
+}
+
+
+/*
+	最大子序列问题 
+*/
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn = 10010;
+int A[maxn],dp[maxn];
+int main(){
+	int n;
+	while(scanf("%d",&n) !=EOF ){
+		for(int i=0;i<n;i++){
+			scanf("%d",&A[i]);
+		}
+		//边界
+		dp[0]= A[0];
+		for(int i=1;i<n;i++){
+			dp[i] = max(A[i],A[i] + dp[i-1]);
+		} 
+		int k=0;
+		for(int i=1;i<n;i++){
+			if(dp[i] > dp[k]){
+				k=i;
+			}
+		}
+		printf("%d\n",dp[k]);
+	} 
+	return 0;
+} 
+
+
+/*
+	最大子序列问题 
+	题目描述   http://codeup.cn/problem.php?cid=100000626&pid=0
+给定K个整数的序列{ N1, N2, ..., NK }，其任意连续子序列可表示为{ Ni, Ni+1, ..., Nj }，其中 1 <= i <= j <= K。最大连续子序列是所有连续子序列中元素和最大的一个，例如给定序列{ -2, 11, -4, 13, -5, -2 }，其最大连续子序列为{ 11, -4, 13 }，最大和为20。现在增加一个要求，即还需要输出该子序列的第一个和最后一个元素。
+
+输入
+测试输入包含若干测试用例，每个测试用例占2行，第1行给出正整数K( K<= 10000 )，第2行给出K个整数，中间用空格分隔，每个数的绝对值不超过100。当K为0时，输入结束，该用例不被处理。
+
+输出
+对每个测试用例，在1行里输出最大和、最大连续子序列的第一个和最后一个元素，中间用空格分隔。如果最大连续子序列不唯一，则输出序号i和j最小的那个（如输入样例的第2、3组）。若所有K个元素都是负数，则定义其最大和为0，输出整个序列的首尾元素。
+
+样例输入 Copy
+5
+-3 9 -2 5 -4
+3
+-2 -3 -1
+0
+样例输出 Copy
+12 9 5
+0 -2 -1
+*/
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn = 10010;
+int a[maxn],dp[maxn];
+int main(){
+	int n;
+	while(scanf("%d",&n) !=EOF && n){
+		for(int i=0;i<n;i++){
+			scanf("%d",&a[i]);
+		}
+		dp[0] = a[0];
+		int ans =dp[0],left = 0,right =0;
+		for(int i=1;i<n;i++){
+			dp[i] = max(a[i],dp[i-1]+a[i]);
+			if(dp[i] > ans){
+				ans = dp[i];
+				right = i;
+			}
+		}
+		for(int i=right;;i--){
+			ans -= a[i];
+			if(ans == 0) {
+				left =i;break;
+			}
+		}
+		if(dp[right] >= 0 ){
+			printf("%d %d %d\n",dp[right],a[left],a[right]);
+		}else{
+			printf("0 %d %d\n",a[0],a[n-1]);
+		}
+	}	
+	return 0;
+} 
+/*
+题目描述   http://codeup.cn/problem.php?cid=100000627&pid=0
+一个数列ai如果满足条件a1 < a2 < ... < aN，那么它是一个有序的上升数列。我们取数列(a1, a2, ..., aN)的任一子序列(ai1, ai2, ..., aiK)使得1 <= i1 < i2 < ... < iK <= N。例如，数列(1, 7, 3, 5, 9, 4, 8)的有序上升子序列，像(1, 7)， (3, 4, 8)和许多其他的子序列。在所有的子序列中，最长的上升子序列的长度是4，如(1, 3, 5, 8)。
+
+    现在你要写一个程序，从给出的数列中找到它的最长上升子序列。
+输入
+输入包含两行，第一行只有一个整数N（1 <= N <= 1000），表示数列的长度。
+
+第二行有N个自然数ai，0 <= ai <= 10000，两个数之间用空格隔开。
+
+输出
+输出只有一行，包含一个整数，表示最长上升子序列的长度。
+
+样例输入 Copy
+7
+1 7 3 5 9 4 8
+样例输出 Copy
+4
+*/
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn =10010;
+int a[maxn],dp[maxn];
+int main(){
+	int n;
+	while( scanf("%d",&n) !=EOF && n){
+		for(int i=0;i<n;i++){
+			scanf("%d",&a[i]);
+		}
+		int ans = -1;
+		for(int i=0;i<n;i++){
+			dp[i]=1;
+			for(int j=0;j<i;j++){
+				if(a[i] >= a[j] && (dp[j] +1 >dp[i]) ){
+					dp[i] = dp[j]+1;
+				}
+			}
+			ans = max(ans,dp[i]);
+		}
+		printf("%d\n",ans);
+	} 
+	return 0;
+}
+
+/*
+	最长公共子序列  
+	题目描述   http://codeup.cn/problem.php?cid=100000628&pid=0
+给你一个序列X和另一个序列Z，当Z中的所有元素都在X中存在，并且在X中的下标顺序是严格递增的，那么就把Z叫做X的子序列。
+例如：Z=<a,b,f,c>是序列X=<a,b,c,f,b,c>的一个子序列，Z中的元素在X中的下标序列为<1,2,4,6>。
+现给你两个序列X和Y，请问它们的最长公共子序列的长度是多少？
+输入
+输入包含多组测试数据。每组输入占一行，为两个字符串，由若干个空格分隔。每个字符串的长度不超过100。
+输出
+对于每组输入，输出两个字符串的最长公共子序列的长度。
+样例输入 Copy
+abcfbc abfcab
+programming contest 
+abcd mnp
+样例输出 Copy
+4
+2
+0
+*/
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+const int maxn = 101;
+char a[maxn],b[maxn];
+int dp[maxn][maxn];
+int main(){
+	int n;
+	while(scanf("%s %s",a+1,b+1)!=EOF){
+	
+		int lena = strlen(a+1);
+		int lenb = strlen(b+1);
+		//边界 
+		for(int i=0;i<=lena;i++){
+			dp[i][0] = 0;
+		} 
+		for(int j=0;j<=lenb;j++){
+			dp[0][j]=0;
+		}
+		//状态转移方程
+		for(int i=1;i<=lena;i++){
+			for(int j=1;j<=lenb;j++){
+				if(a[i] == b[j]){
+					dp[i][j] = dp[i-1][j-1] + 1;
+				}else{
+					dp[i][j] = max(dp[i-1][j],dp[i][j-1]);
+				}
+			}
+		} 
+		printf("%d\n",dp[lena][lenb]);
+		
+		}
+	
+	return 0;	
+} 
+
+
+/*
+ 最长回文子串
+ 输入 PATZJUJZTACCBCC
+ 输出 9 
+*/ 
+
+#include<cstdio>
+#include<algorithm> 
+#include<cstring>
+using namespace std;
+const int maxn = 1010;
+char s[maxn];
+int dp[maxn][maxn];
+int main(){
+	gets(s);
+	int len = strlen(s), ans = 1;
+	memset(dp, 0 ,sizeof(dp));
+	//边界
+	for(int i=0;i<len;i++){
+		dp[i][i] =1;
+		if(i< len -1){
+			if(s[i] == s[i+1]){
+				dp[i][i+1] = 1;
+				ans = 2; //初始化时注意当前最长回文子串长度 
+			}
+		}
+	}
+	//状态转移方程 
+	for(int l=3;l<= len ;l++){  //枚举字串长度 
+		for(int i=0;i+l-1<len;i++){  //枚举字串的起始端点 
+			int j = i+l-1; //字串的右端点 
+			if(s[i] == s[j] && dp[i+1][j-1] == 1 ){
+				dp[i][j] =1;
+				ans = l;  //更新最长回文子串长度 
+			} 
+		}
+	} 
+	printf("%d\n",ans);
+	return 0;
+}
+
+/*
+题目描述  http://codeup.cn/problem.php?cid=100000629&pid=0
+输入一个字符串，求出其中最长的回文子串。子串的含义是：在原串中连续出现的字符串片段。
+回文的含义是：正着看和倒着看相同。如abba和yyxyy。在判断回文时，应该忽略所有标点符号和空格，
+且忽略大小写，但输出应保持原样（在回文串的首部和尾部不要输出多余字符）。
+输入字符串长度不超过5000，且占据单独的一行。应该输出最长的回文串，如果有多个，
+输出起始位置最靠左的。
+
+输入
+一行字符串，字符串长度不超过5000。
+
+输出
+字符串中的最长回文子串。
+
+样例输入 Copy
+Confuciuss say:Madam,I'm Adam.
+样例输出 Copy
+Madam,I'm Adam
+样例说明：Madam,I'm Adam去掉空格、逗号、单引号、忽略大小写为MADAMIMADAM，是回文。
+
+算法分析一：
+
+首先解决“判断时忽略标点，输出进却要按原样”的问题？ 可以用一个简单的方法：预处理。构造一个新字符串，不包含原来的标点符号，而且所有字符变成大写（顺便解决了大小写的问题）。用到的函数：
+
+（1）isalpha(c)用来检查c是否为字母，如果是字母，则返回1；否则返回0。
+
+（2）isdigit(c)用来检查c是否为数字（0～9），如果是数字，则返回1；否则返回0。
+
+（3）toupper(c)用来将c字符转换为大写字母，返回c对应的大写字母。
+
+（4）tolower(c)用来将c字符转换为小写字母，返回c对应的小写字母。
+
+
+下面来枚举回文串的起点和终点，然后判断它是否真的是回文串。
+
+int max=0;
+
+for(i = 0; i < m; i++)
+
+   for(j = i; j < m; j++)
+
+       if(s[i..j]是回文串 && j-i+1 > max) max = j-i+1;
+
+“当前最大值”变量max，它保存的是目前为止发现的最长回文子串的长度。如果串s的第i个字符到第j个字符（记为s[i..j]）是回文串，则检查长度j-i+1是否超过max。
+
+
+判断s[i..j]是否为回文串的方法如下：
+
+int ok = 1;
+
+for(k = i; k <= j; k++)
+
+    if(s[k] != s[i+j-k])   ok = 0;
+
+s[k]的“对称”位置是s[i+j-k]，因为只要一次比较失败，就应把标记变量ok置为0。
+
+
+
+最后的问题：原样输出。
+
+    由于在求max值时，不知道s[i]和s[j]在原串buf中的位置。因此，必须增加一个数组p，用p[i]保存s[i]在buf中的位置。在预处理得到，然后在更新max的同时把p[i]和p[j]保存到x和y，最后输出buf[x]到buf[y]中的所有字符。
+
+不足：当输入字符串较长时，容易超时，因枚举回文起点和终点，循环过多。
+
+
+
+算法分析二：枚举回文串的“中间”位置i，然后不断往外扩展，直到有字符不同。提示：长度为奇数和偶数的处理方式是不一样的。
+思路
+去掉特殊字符，大写转化为小写，保存在新的字符串中，同时用map保存该字符在原串的位置和新串位置的映射。
+
+使用动态规划求解回文字符串的方法，同时保存当前最大串的左右在原串中的下标。
+*/
+
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+const int maxn  = 5010;
+char s[maxn];
+int dp[maxn][maxn];
+int main()
+{
+ 
+    while(gets(s)!=NULL)
+    {
+        char a[maxn];
+        int p[maxn] = {0};
+        memset(dp, 0, sizeof(dp));
+        //边界
+        int k = 0;
+        for(int i=0; i<(int)strlen(s); i++)
+        {
+            if(s[i]>='A'&&s[i]<='Z')
+            {
+                a[k] = s[i] + 32;
+                p[k] = i;
+                k++;
+            }
+            else if(s[i]>='a'&&s[i]<='z'||s[i]>='0'&&s[i]<='9')
+            {
+                a[k] = s[i];
+                p[k] = i;
+                k++;
+            }
+        }
+        int len = strlen(a), ans = 1;
+        int left = p[0], right=p[0];
+        for(int i=0; i<len; i++)
+        {
+            dp[i][i] = 1;
+            if(i<len-1)
+            {
+                if(a[i]==a[i+1])
+                {
+                    dp[i][i+1] = 1;
+                    if(ans < 2)
+                   {
+                       ans = 2;//更新最长回文字串长度
+                       left = p[i];
+                       right = p[i+1];
+                   }
+                }
+            }
+        }
+ 
+        //状态转移方程
+        for(int l=3; l<=len; l++)//枚举子串的长度
+           for(int i=0; i+l-1<len; i++)//枚举字串的起始端点
+           {
+               int j=i+l-1;//字串的右端点
+               if(a[i]==a[j]&&dp[i+1][j-1]==1)
+               {
+                   dp[i][j] = 1;//dp[i][j]=1代表i~j是回文字串
+                   if(ans < l)
+                   {
+                       ans = l;//更新最长回文字串长度
+                       left = p[i];
+                       right = p[j];
+                   }
+               }
+           }
+       for(int i=left; i<=right; i++)
+            printf(i != right ? "%c": "%c\n" ,s[i]);
+    }
+   return 0;
+}
+
+/* DAG 最长路 
+题目描述   http://codeup.cn/problem.php?cid=100000630&pid=0
+有n个矩形，每个矩形可以用a,b来描述，表示长和宽。矩形X(a,b)可以嵌套在矩形Y(c,d)中当且仅当a<c,b<d或者b<c,a<d（相当于旋转X90度）。例如（1,5）可以嵌套在（6,2）内，但不能嵌套在（3,4）中。你的任务是选出尽可能多的矩形排成一行，使得除最后一个外，每一个矩形都可以嵌套在下一个矩形内。
+输入
+第一行是一个正正数N(0<N<10)，表示测试数据组数，
+每组测试数据的第一行是一个正正数n，表示该组测试数据中含有矩形的个数(n<=1000)
+随后的n行，每行有两个数a,b(0<a,b<100)，表示矩形的长和宽
+输出
+每组测试数据都输出一个数，表示最多符合条件的矩形数目，每组输出占一行
+样例输入 Copy
+1
+10
+1 2
+2 4
+5 8
+6 10
+7 9
+3 1
+5 8
+12 10
+9 7
+2 2
+样例输出 Copy
+5
+
+*/
+
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxv =1001;
+const int INF = 10000000;
+int G[maxv][maxv]={0};
+int dp[maxv];
+int n;
+int DP(int i){
+	if( dp[i] >0) return dp[i];
+	for(int j=0;j<n;j++){
+		if(G[i][j] != INF){
+			int temp = DP(j) + G[i][j];
+			if(temp > dp[i]){
+				dp[i] = temp;
+			}
+		}
+	}
+	return dp[i];
+} 
+int main(){
+	int m,a[maxv],b[maxv];
+	while( scanf("%d",&m) !=EOF &&m){
+		while(m--){
+			scanf("%d",&n);
+			fill(G[0],G[0]+maxv*maxv ,INF);
+			fill(dp,dp+maxv,0);
+			for(int i=0;i<n;i++){
+				scanf("%d %d",&a[i],&b[i]);
+			}
+			for(int i=0;i<n;i++){
+				for( int j=0;j<n;j++){
+					if( (a[i]<a[j] && b[i]<b[j]) || (a[i]<b[j]&&b[i]<a[j])){
+						G[i][j] = 1;
+					}
+				}
+			}
+			int ans = -1;
+			for(int i=0;i<n;i++){
+				ans = max(ans,DP(i));
+			}
+			printf("%d\n",ans+1);
+		}
+		
+		
+	}
+	return 0;
+}
+//01 背包 
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn = 100;
+const int maxv = 10000;
+int w[maxn],c[maxn],dp[maxv];
+int main(){
+	int n,V;
+	while( scanf("%d %d",&n,&V) !=EOF && n+V){
+		for(int i=0;i<n;i++){
+			scanf("%d",&w[i]);
+		} 
+		for(int i=0;i<n;i++){
+			scanf("%d",&c[i]);
+		}
+		//边界
+		for(int v=0;v<=V;v++){
+			dp[v] =0;
+		} 
+		for(int i=0;i<n;i++){
+			for(int v = V;v>=w[i];v--){
+				//状态转移方程
+				dp[v] = max(dp[v],dp[v-w[i]] +c[i]); 
+			}
+		}
+		//寻找答案
+		int ans = 0;
+		for(int v=0;v<=V;v++){
+			if(dp[v] >ans) ans = dp[v];
+		} 
+		printf("%d\n",ans);
+	} 
+	return 0;
+} 
+
+/*
+01 背包 
+【问题描述】
+有一个箱子的容量为V（V为正整数，且满足0≤V≤20000），同时有n件物品（0的体积值为正整数。
+要求从n件物品中，选取若干装入箱内，使箱子的剩余空间最小。
+输入：1行整数，第1个数表示箱子的容量，第2个数表示有n件物品，后面n个数分别表示这n件
+物品各自的体积。
+输出：1个整数，表示箱子剩余空间。
+【输入输出样例】
+输入：
+24 6 8 3 12 7 9 7
+输出：
+0
+*/ 
+#include<cstdio>
+#include<algorithm> 
+using namespace std;
+const int maxn =1000;
+const int maxv =1000010;
+int w[maxn],c[maxn],dp[maxv];//w时重量 c 价值 
+int main(){
+	int V,n;
+	scanf("%d %d",&V,&n);
+	for(int i=0;i<n;i++){
+		scanf("%d",&w[i]); 
+	}
+	for(int i=0;i<=V;i++){ //箱子剩余容量初始为箱子本身容量V 
+		dp[i] = V;
+	}
+	for(int i=1;i<=n;i++){
+		for(int v =V;v>=w[i];v--){
+			dp[v] = min(dp[v],dp[v-w[i]]-w[i]);
+		}
+	}
+	int ans = V;
+	for(int v=0;v<=V;v++){
+		if(dp[v] < ans) ans = dp[v];
+	}
+	printf("%d\n",ans);
+	return 0;
+}
+
+
+/*题目描述
+辰辰是个天资聪颖的孩子，他的梦想是成为世界上最伟大的医师。为此，他想拜附近最有威望的医师为师。
+
+医师为了判断他的资质，给他出了一个难题。
+
+医 师把他带到一个到处都是草药的山洞里对他说：“孩子，这个山洞里有一些不同的草药，采每一株都需要一些时间，每一株也有它自身的价值。我会给你一段时间， 在这段时间里，你可以采到一些草药。如果你是一个聪明的孩子，你应该可以让采到的草药的总价值最大。”
+
+如果你是辰辰，你能完成这个任务吗？
+
+ 【输入 】第 一行有两个整数T（1 <= T <= 1000）和M（1 <= M <= 100），用一个空格隔开，
+
+T代表总共能够用来采药的时间，M代表山洞里的草药的数目。
+
+接下来的M行每行包括两个在1到100之间（包括1和100）的整 数，分别表示采摘某株草药的时间和这株草药的价值。
+
+【输出】一个整数，表示在规定的时间内，可以采到的草药的最大总价值。
+
+
+【样例输入】
+
+70 3
+
+71 100
+
+69 1
+
+1 2
+
+【样例输出】
+
+3
+
+【数据规模】
+
+   对于30%的数据，M <= 10；
+
+   对于全部的数据，M <= 100。
+   
+   
+   */
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn = 101;
+const int maxv = 1010;
+int w[maxn],c[maxn],dp[maxv];
+int main(){
+	int T,M;
+	scanf("%d %d",&T,&M);
+	for(int i=0;i<M;i++){
+		scanf("%d %d",&w[i],&c[i]);
+	}
+	for(int i=0;i<=M;i++){
+		dp[i] = 0;
+	}
+	for(int i =1;i<=M;i++){
+		for(int v=T;v>=w[i];v--){
+			dp[v] = max(dp[v],dp[v-w[i]] +c[i]);
+		}
+	}
+	int ans = 0;
+	for(int v= 0;v<=T;v++){
+		if( dp[v] > ans) ans = dp[v];
+	}
+	printf("%d\n",ans);
+	return 0;
+} 
+
+/*题目描述  http://codeup.cn/problem.php?cid=100000631&pid=2
+母牛们不但创建了他们自己的政府而且选择了建立了自己的货币系统。
+[In their own rebellious way],，他们对货币的数值感到好奇。
+传统地，一个货币系统是由1,5,10,20 或 25,50, 和 100的单位面值组成的。
+母牛想知道有多少种不同的方法来用货币系统中的货币来构造一个确定的数值。
+举例来说, 使用一个货币系统 {1,2,5,10,...}产生 18单位面值的一些可能的方法是:18x1, 9x2, 8x2+2x1, 3x5+2+1,等等其它。
+写一个程序来计算有多少种方法用给定的货币系统来构造一定数量的面值。
+保证总数将会适合long long (C/C++) 和 Int64 (Free Pascal)。
+
+输入
+输入包含多组测试数据
+
+
+货币系统中货币的种类数目是 V 。 (1<= V<=25)
+要构造的数量钱是 N 。 (1<= N<=10,000)
+
+第 1 行:	 二整数， V 和 N
+第 2 ..V+1行：	可用的货币 V 个整数　(每行一个　每行没有其它的数)。
+输出
+单独的一行包含那个可能的构造的方案数。
+样例输入 Copy
+3 10
+1 2 5
+样例输出 Copy
+10
+
+
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn = 10010;
+int main(){
+	int V,N,x;
+	scanf("%d %d",&V,&N);
+	long long dp[maxn] ={1};
+	for(int i=0;i<V;i++){
+		scanf("%d",&x);
+		for(int j=x;j<=N;j++){
+			dp[j] +=dp[j-x];
+		}
+	}
+	printf("%d\n",dp[N]);
+	return 0;
+}
+*/
+//完全背包解法
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn = 100;
+const int maxv = 10010;
+long long dp[maxv],v[maxn];
+int main(){
+	int V,N;
+	while( scanf("%d %d",&V,&N) !=EOF){
+		for(int i=1;i<=V;i++){
+			scanf("%d",&v[i]);
+		}
+		for(int i=0;i<=N;i++){
+			dp[i] = 0;
+		}
+		dp[0] = 1;
+		int num = 0;
+		for(int i =1;i<=V;i++){
+			for( int x= v[i];x<=N;++x){
+				dp[x] +=dp[x-v[i]]; 
+			}
+		}
+		printf("%lld\n",dp[N]);
+	}
+	return 0;
+} 
+/*题目描述   http://codeup.cn/problem.php?cid=100000632&pid=1
+某国为了防御敌国的导弹袭击，开发出一种导弹拦截系统。但是这种导弹拦截系统有一个缺陷：虽然它的第一发炮弹能够到达任意的高度，但是以后每一发炮弹都不能高于前一发的高度。某天，雷达捕捉到敌国的导弹来袭，并观测到导弹依次飞来的高度，请计算这套系统最多能拦截多少导弹。拦截来袭导弹时，必须按来袭导弹袭击的时间顺序，不允许先拦截后面的导弹，再拦截前面的导弹。
+
+输入
+每组输入有两行，第一行，输入雷达捕捉到的敌国导弹的数量k（k<=25），第二行，输入k个正整数，表示k枚导弹的高度，按来袭导弹的袭击时间顺序给出，以空格分隔。
+
+
+输出
+每组输出只有一行，包含一个整数，表示最多能拦截多少枚导弹。
+
+
+
+样例输入 Copy
+4
+9 6 7 8
+7
+4 5 6 7 13 42 3
+5
+6 5 4 3 5
+0
+样例输出 Copy
+2
+2
+4
+*/
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn = 30;
+int dp[maxn],w[maxn];
+int main(){
+	int n;
+	while( scanf("%d",&n) !=EOF && n){
+		for(int i=1;i<=n;i++){
+			scanf("%d",&w[i]);
+		}
+		int ans = -1;
+		for(int i=1;i<=n;i++){
+			dp[i] = 1;
+			for(int j=1;j<i;j++){
+				if( w[i] <= w[j] && (dp[j] + 1>dp[i])){
+				dp[i] = dp[j] +1; 
+				}
+			}
+			ans = max(ans,dp[i]);
+		}
+		printf("%d\n",ans);
+	}
+	
+	return 0;
+} 
+/*
+题目描述   http://codeup.cn/problem.php?cid=100000632&pid=2
+N位同学站成一排，音乐老师要请其中的(N-K)位同学出列，使得剩下的K位同学不交换位置就能排成合唱队形。
+合唱队形是指这样的一种队形：设K位同学从左到右依次编号为1, 2, …, K，他们的身高分别为T1, T2, …, TK，
+则他们的身高满足T1 < T2 < … < Ti , Ti > Ti+1 > … > TK (1 <= i <= K)。
+你的任务是，已知所有N位同学的身高，计算最少需要几位同学出列，可以使得剩下的同学排成合唱队形。
+
+输入
+输入的第一行是一个整数N（2 <= N <= 100），表示同学的总数。
+第一行有n个整数，用空格分隔，第i个整数Ti（130 <= Ti <= 230）是第i位同学的身高（厘米）。
+
+输出
+可能包括多组测试数据，对于每组数据，
+输出包括一行，这一行只包含一个整数，就是最少需要几位同学出列。
+
+样例输入 Copy
+3
+174 208 219 
+6
+145 206 193 171 187 167 
+0
+样例输出 Copy
+0
+1
+
+思路；这一题是求最长不降子序列的变形，需要求 dp1?[ i ] 
+（从下标0?开始从前往后 以?i?结尾的最长不增子序列）、dp2 [ i ] 
+（从下标n?开始从后往前 以 i?结尾的最长不增子序列），求完dp1、dp2后，
+将两个数组对应下标相加求最大max，最终结果则为 n - max + 1
+（加1的原因是 i?本身在dp1[]和dp2[]里各算了一次，所以多减了一个，要加回去）
+
+*/
+
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn = 1010;
+int dp1[maxn],a[maxn],dp2[maxn];
+int main(){
+	int n;
+	while( scanf("%d",&n) !=EOF && n){
+		for(int i=1;i<=n;i++){
+			scanf("%d",&a[i]);
+		}
+		int ans = 0;
+		for(int i=1;i<=n;i++){
+			dp1[i] = 1;
+			dp2[n+1-i] = 1;
+			for(int j=1;j<i;j++){ //从前往后找 不降子序列 个数  
+				if( a[i] > a[j] && dp1[j] +1>dp1[i]){
+					dp1[i] = dp1[j]+1;
+				}
+				if(a[n+1-i] > a[n+1-j] &&dp2[n+1-j] +1 > dp2[n+1-i]){
+					dp2[n+1-i] = dp2[n+1-j]+1; //从后往前找 上升子序列个数 
+				}
+			}
+			
+		}
+		for(int i=1;i<=n;i++){
+			ans = max(ans,dp1[i]+dp2[i]);
+		}
+		printf("%d\n",n-ans+1);
+	}
+
+	return 0;
+}
+
+/*
+题目描述  http://codeup.cn/problem.php?cid=100000632&pid=3
+Find a longest common subsequence of two strings.
+
+输入
+First and second line of each input case contain two strings of lowercase character a…z. There are no spaces before, inside or after the strings. Lengths of strings do not exceed 100.
+
+输出
+For each case, output k – the length of a longest common subsequence in one line.
+
+样例输入 Copy
+google
+goodbye
+样例输出 Copy
+4
+ 思路：最长公共子序列 问题  
+*/
+
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+const int maxn=110;
+int dp[maxn][maxn];
+char s1[maxn],s2[maxn];
+ 
+int main()
+{
+	int n;
+	while(~scanf("%s",s1+1))
+	{
+		scanf("%s",s2+1);
+		int len1=1,len2=1;
+		while(s1[len1]!='\0')
+			++len1;
+		--len1;
+		while(s2[len2]!='\0')
+			++len2;
+		--len2;
+		for(int i=0;i<=len1;++i)
+		{
+			dp[i][0]=0;
+		}
+		for(int i=0;i<=len2;++i)
+		{
+			dp[0][i]=0;
+		}
+		for(int i=1;i<=len1;++i)
+			for(int j=1;j<=len2;++j)
+			{
+				if(s1[i]==s2[j])
+				{
+					dp[i][j]=dp[i-1][j-1]+1;
+				}
+				else
+				{
+					dp[i][j]=max(dp[i-1][j],dp[i][j-1]);
+				}
+			}
+		printf("%d\n",dp[len1][len2]);
+	}
+    return 0;
+}
+法二： 读入不一样
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+const int  maxn = 110;
+char a[maxn],b[maxn];
+int dp[maxn][maxn];
+int main(){
+	gets(a+1);
+	gets(b+1);
+	int lenA = strlen(a+1);
+	int lenB = strlen(b+1);
+	//边界
+	for(int i=0;i<=lenA;i++){
+		dp[i][0] = 0;
+	} 
+	for(int j=0;j<=lenB;j++){
+		dp[0][j] = 0;
+	} 
+	//状态转移方程
+	for(int i=1;i<=lenA;i++){
+		for(int j=1;j<=lenB;j++){
+			if(a[i] == b[j]){
+				dp[i][j] = dp[i-1][j-1] +1;
+			}else{
+				dp[i][j] = max(dp[i-1][j],dp[i][j-1]);
+			}
+		}
+	} 
+	printf("%d\n",dp[lenA][lenB]); 
+	return 0;
+	
+} 
+
+/*
+题目描述   http://codeup.cn/problem.php?cid=100000632&pid=4
+已知矩阵的大小定义为矩阵中所有元素的和。给定一个矩阵，你的任务是找到最大的非空(大小至少是1 * 1)子矩阵。
+比如，如下4 * 4的矩阵
+
+0 -2 -7 0
+9 2 -6 2
+-4 1 -4 1
+-1 8 0 -2
+
+的最大子矩阵是
+
+9 2
+-4 1
+-1 8
+
+这个子矩阵的大小是15。
+
+输入
+输入是一个N * N的矩阵。输入的第一行给出N (0 < N <= 100)。
+再后面的若干行中，依次（首先从左到右给出第一行的N个整数，再从左到右给出第二行的N个整数……）给出矩阵中的N2个整数，整数之间由空白字符分隔（空格或者空行）。
+已知矩阵中整数的范围都在[-127, 127]。
+
+输出
+测试数据可能有多组，对于每组测试数据，输出最大子矩阵的大小。
+
+样例输入 Copy
+1
+27 
+3
+-40 29 -16 
+38 18 22 
+24 -35 5 
+样例输出 Copy
+27
+78
+思路：看似是一个二维求最大连续子序列和问题，实际可以降至一维进行求解
+对于确定的从第 A?行到?第?B?行，将?同一列的数相加，最终得到一个一维的数序列，
+对于这个数序列求最大连续子序列和就可以啦。状态转移方程为：
+ dp [ i ] = max ( a [ i ] , dp [ i - 1 ] + a[ i ] )
+
+*/
+
+#include <cstdio>
+#include <algorithm>
+using namespace std;
+const int maxn=110;
+int dp[maxn],M[maxn][maxn],r[maxn],n;
+int subSeq()
+{
+	int ans=r[0];
+	dp[0]=r[0];
+	for(int i=1;i<n;++i)
+	{
+		dp[i]=max(r[i],dp[i-1]+r[i]);
+		ans=max(ans,dp[i]);
+	}
+	return ans;
+}
+int main()
+{
+	while( scanf("%d",&n) !=EOF && n)
+	{
+		for(int i=0;i<n;++i)
+			for(int j=0;j<n;++j)
+				scanf("%d",&M[i][j]);
+		int res=M[0][0];
+		for(int i=0;i<n;++i)
+		{
+			fill(r,r+maxn,0);
+			for(int j=i;j<n;++j)
+			{
+				for(int k=0;k<n;++k)
+				{
+					r[k]+=M[j][k];
+				}
+				res=max(res,subSeq());
+			}
+		}
+		printf("%d\n",res);
+	}
+    return 0;
+}	
+
+/*
+题目描述  http://codeup.cn/problem.php?cid=100000632&pid=5
+把M个同样的苹果放在N个同样的盘子里，允许有的盘子空着不放，问共有多少种不同的分法？（用K表示）5，1，1和1，5，1 是同一种分法。
+
+输入
+第一行是测试数据的数目t（0 <= t <= 20）。以下每行均包含二个整数M和N，以空格分开。1<=M，N<=10。
+
+输出
+对输入的每组数据M和N，用一行输出相应的K。
+
+样例输入 Copy
+2
+6 3
+7 2
+样例输出 Copy
+7
+4
+提示
+解题分析：
+         设f(m,n) 为m个苹果，n个盘子的放法数目，则先对n作讨论，
+         当n>m：必定有n-m个盘子永远空着，去掉它们对摆放苹果方法数目不产生影响。即if(n>m) f(m,n) = f(m,m)　　
+         当n<=m：不同的放法可以分成两类：
+         1、有至少一个盘子空着，即相当于f(m,n) = f(m,n-1);  
+         2、所有盘子都有苹果，相当于可以从每个盘子中拿掉一个苹果，不影响不同放法的数目，即f(m,n) = f(m-n,n).
+         而总的放苹果的放法数目等于两者的和，即 f(m,n) =f(m,n-1)+f(m-n,n) 
+     递归出口条件说明：
+         当n=1时，所有苹果都必须放在一个盘子里，所以返回１；
+         当没有苹果可放时，定义为１种放法；
+         递归的两条路，第一条n会逐渐减少，终会到达出口n==1; 
+         第二条m会逐渐减少，因为n>m时，我们会return f(m,m)　所以终会到达出口m==0．
+
+// 递归  
+#include<cstdio>
+using namespace std;
+const int manx = 20;
+int f(int m,int n){
+	if(n==1 || m==0){
+		return 1;
+	}
+	if(n>m){
+		return f(m,m);
+	}
+	if(n<=m){
+		return  f(m,n-1)+f(m-n,n);
+	}
+}
+int main(){
+	int m,n,k;
+	while( scanf("%d",&k) !=EOF && k){
+		while(k--){
+			scanf("%d %d",&m,&n);
+			printf("%d\n",f(m,n));
+		}
+	}
+	return 0;
+}
+
+*/
+//动态规划
+#include<cstdio>
+using namespace std;
+const int maxn = 20;
+int dp[maxn][maxn];
+int main(){
+	int m,n,k;
+	while( scanf("%d",&k) !=EOF && k){
+		for(int i=0;i<k;i++){
+			scanf("%d %d",&m,&n);
+			for(int j=0;j<=m;j++){
+				dp[j][0] = 0;
+				dp[j][1] = 1;
+			} 
+			for(int j=0;j<=n;j++){
+				dp[0][j] =1;
+			}
+			for(int u=1;u<=m;u++){
+				for(int v=1;v<=n;v++){
+					if(v>u){
+						dp[u][v] = dp[u][u];
+					}else{
+						dp[u][v] = dp[u][v-1] +dp[u-v][v]; 
+					} 
+				}
+			}
+			printf("%d\n",dp[m][n]);
+		}
+	}
+	return 0;
+} 
+/*
+题目描述  http://codeup.cn/problem.php?cid=100000632&pid=6
+北大网络实验室经常有活动需要叫外买，但是每次叫外买的报销经费的总额最大为C元，有N种菜可以点，经过长时间的点菜，网络实验室对于每种菜i都有一个量化的评价分数（表示这个菜可口程度），为Vi，每种菜的价格为Pi, 问如何选择各种菜，使得在报销额度范围内能使点到的菜的总评价分数最大。
+    注意：由于需要营养多样化，每种菜只能点一次。
+
+输入
+输入的第一行有两个整数C（1 <= C <= 1000）和N（1 <= N <= 100），C代表总共能够报销的额度，N>代表能点菜的数目。接下来的N行每行包括两个在1到100之间（包括1和100）的的整数，分别表示菜的>价格和菜的评价分数。
+
+输出
+输出只包括一行，这一行只包含一个整数，表示在报销额度范围内，所点的菜得到的最大评价分数。
+
+样例输入 Copy
+1 3
+1 5
+3 3
+2 5
+24 8
+2 9
+8 6
+4 1
+1 4
+2 2
+10 5
+2 1
+1 4
+样例输出 Copy
+5
+30
+提示
+动态规划问题
+01 背包 
+*/
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int maxn =100;
+const int maxv =1010;
+int w[maxn],c[maxn],dp[maxv];
+int main(){
+	int n,v;
+	while(scanf("%d %d",&v,&n) !=EOF ){
+		for(int i=1;i<=n;i++){
+			scanf("%d %d",&w[i],&c[i]);
+		}
+		//边界
+		for(int j=0;j<=v;j++) {
+			dp[j] = 0;
+		}
+		for(int i=1;i<=n;i++){
+			for(int j=v;j>=w[i];j--){
+				dp[j] = max(dp[j], dp[j-w[i]]+c[i]); 
+			}	
+		}
+		int ans = 0;
+		for(int i=0;i<=v;i++){
+			if(dp[i]>ans) ans = dp[i];
+		}
+		printf("%d\n",ans);
+	}
+	return 0;
+}
+
+/*题目描述
+每 年毕业的季节都会有大量毕业生发起狂欢，好朋友们相约吃散伙饭，网络上称为“bg”。参加不同团体的bg会有不同的感觉，我们可以用一个非负整数为每个 bg定义一个“快乐度”。现给定一个bg列表，上面列出每个bg的快乐度、持续长度、bg发起人的离校时间，请你安排一系列bg的时间使得自己可以获得最 大的快乐度。
+
+例如有4场bg：
+第1场快乐度为5，持续1小时，发起人必须在1小时后离开；
+第2场快乐度为10，持续2小时，发起人必须在3小时后离开；
+第3场快乐度为6，持续1小时，发起人必须在2小时后离开；
+第4场快乐度为3，持续1小时，发起人必须在1小时后离开。
+则获得最大快乐度的安排应该是：先开始第3场，获得快乐度6，在第1小时结束，发起人也来得及离开；再开始第2场，获得快乐度10，在第3小时结束，发起人正好来得及离开。此时已经无法再安排其他的bg，因为发起人都已经离开了学校。因此获得的最大快乐度为16。
+
+注意bg必须在发起人离开前结束，你不可以中途离开一场bg，也不可以中途加入一场bg。
+又因为你的人缘太好，可能有多达30个团体bg你，所以你需要写个程序来解决这个时间安排的问题。
+输入
+测试输入包含若干测试用例。每个测试用例的第1行包含一个整数N (<=30)，随后有N行，每行给出一场bg的信息：
+    h l t
+其中 h 是快乐度，l是持续时间（小时），t是发起人离校时间。数据保证l不大于t,因为若发起人必须在t小时后离开，bg必须在主人离开前结束。
+
+当N为负数时输入结束。
+
+输出
+每个测试用例的输出占一行，输出最大快乐度。
+样例输入 Copy
+3
+6 3 3
+3 2 2
+4 1 3
+4
+5 1 1
+10 2 3
+6 1 2
+3 1 1
+-1
+样例输出 Copy
+7
+16
+
+*/
+
+
+
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+const int maxn=1000;
+int dp[maxn];
+struct BG
+{
+	int h,l,t;
+}bg[maxn];
+ 
+bool cmp(const BG a,const BG b)
+{
+	return a.t<b.t;
+}
+int main()
+{
+	int n;
+	while(~scanf("%d",&n))
+	{
+		if(n<0)
+			break;
+		int max1=0;
+		for(int i=1;i<=n;++i)
+		{
+			scanf("%d %d %d",&bg[i].h,&bg[i].l,&bg[i].t);
+			if(bg[i].t>max1)
+				max1=bg[i].t;
+		}
+		sort(bg+1,bg+n+1,cmp);
+		memset(dp,0,sizeof(dp));
+		for(int i=1;i<=n;++i)
+		{
+			for(int j=bg[i].t;j>=bg[i].l;--j)
+			{
+				dp[j]=max(dp[j],dp[j-bg[i].l]+bg[i].h);
+			}
+		}
+		int result=dp[max1];
+		for(int j=max1;j>=1;--j)
+			if(result<dp[j])
+				result=dp[j];
+		printf("%d\n",result);
+	}
+	return 0;
+}
