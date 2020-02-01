@@ -1,0 +1,1487 @@
+/*  pat1057 Stack (30分)
+Stack is one of the most fundamental data structures, 
+which is based on the principle of Last In First Out (LIFO). 
+The basic operations include Push (inserting an element onto the top position)
+and Pop (deleting the top element). Now you are supposed to implement a stack with an extra operation:
+PeekMedian -- return the median value of all the elements in the stack. With N elements, 
+the median value is defined to be the (N/2)-th smallest element if N is even, or ((N+1)/2)-th if N is odd.
+
+Input Specification:
+Each input file contains one test case. 
+For each case, the first line contains a positive integer N (≤10?5?? ). 
+Then N lines follow, each contains a command in one of the following 3 formats:
+
+Push key
+Pop
+PeekMedian
+
+where key is a positive integer no more than 10
+?5
+?? .
+
+Output Specification:
+For each Push command, insert key into the stack and output nothing. 
+For each Pop or PeekMedian command, print in a line the corresponding returned value.
+ If the command is invalid, print Invalid instead.
+
+Sample Input:
+17
+Pop
+PeekMedian
+Push 3
+PeekMedian
+Push 2
+PeekMedian
+Push 1
+PeekMedian
+Pop
+Pop
+Push 5
+Push 4
+PeekMedian
+Pop
+Pop
+Pop
+Pop
+
+Sample Output:
+Invalid
+Invalid
+3
+2
+2
+1
+2
+4
+4
+5
+3
+Invalid
+
+*/
+
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+#include<stack>
+using namespace std;
+const int maxn = 100010;
+const int sqrN = 316; //sqrt 表示块内元素个数
+stack<int> st; //栈
+int block[sqrN];
+int table[maxn];
+
+void peekMedian(int k){
+	int sum = 0; //sum存放当前累计存在的数的个数 
+	int idx = 0; // 块号
+	while( sum + block[idx] < k){
+		sum +=block[idx++]; //未达到k，则累加上当前块的元素个数 
+	} 
+	int num = idx * sqrN; //idx号块的第一个数 
+	while( sum + table[num] < k){
+		sum +=table[num++]; //累加块内元素个数，直到sum 达到k 
+	}
+	printf("%d\n",num);  //sum到达k 找到第k 大的数 
+} 
+void Push(int x){
+	st.push(x); //入栈 
+	block[x/sqrN]++;
+	table[x]++; 
+}
+void Pop(){
+	int x = st.top();
+	st.pop();
+	block[x/sqrN]--;
+	table[x]--;
+	printf("%d\n",x);
+}
+int main(){
+	int x,query;
+	memset(block, 0, sizeof(block));
+	memset(table,0,sizeof(table));
+	char cmd[20];
+	scanf("%d",&query);
+	for(int i=0;i<query;i++){
+		scanf("%s",cmd);
+		if(strcmp(cmd,"Push") == 0){
+			scanf("%d",&x);
+			Push(x); 
+		}else if(strcmp(cmd,"Pop") == 0){
+			if(st.empty() == true){
+				printf("Invalid\n"); 
+			}else{
+				Pop();
+			}
+		}else{
+			if(st.empty() == true){
+				printf("Invalid\n"); 	
+			}else{
+				int k = st.size();
+				if(k%2 == 1) k = (k+1) / 2;
+				else{
+					k = k/2;
+				} 
+				peekMedian(k);
+			}
+		}
+	} 
+	return 0;
+}
+
+/*
+paT 1001 A+B Format (20分)
+Calculate a+b and output the sum in standard format -- that is, the digits must be separated into groups of three by commas (unless there are less than four digits).
+
+Input Specification:
+Each input file contains one test case. Each case contains a pair of integers a and b where ?10
+?6
+?? ≤a,b≤10
+?6
+?? . The numbers are separated by a space.
+
+Output Specification:
+For each test case, you should output the sum of a and b in one line. The sum must be written in the standard format.
+
+Sample Input:
+-1000000 9
+
+Sample Output:
+-999,991
+
+*/
+#include<cstdio>
+using namespace std;
+int main(){
+	int m,n;
+	int sum;
+	while( scanf("%d %d",&m,&n) !=EOF){
+		sum = m+n;
+		if(sum <0){
+			printf("-");
+			sum = -sum;
+		}
+		if(sum>=1000000){
+			printf("%d,%03d,%03d\n",sum/1000000,(sum/1000)%1000, sum%1000);
+		}else if(sum >=1000){
+			printf("%d,%03d\n",sum/1000,sum%1000);
+		}else{
+			printf("%d\n",sum);
+		}
+	}
+	return 0;
+}
+/*1002 A+B for Polynomials (25分)
+This time, you are supposed to find A+B where A and B are two polynomials.
+
+Input Specification:
+Each input file contains one test case. Each case occupies 2 lines, and each line contains the information of a polynomial:
+
+K N	
+?1
+    a
+?N
+?1
+   
+    N
+?2
+    a
+?N
+?2
+   
+    ... N
+?K
+    a
+?N
+?K
+   
+where K is the number of nonzero terms in the polynomial, N
+?i
+    and a
+?N
+?i
+    (i=1,2, ,K) are the exponents and coefficients, respectively. It is given that 1≤K≤10，0≤N
+?K
+   < <N
+?2
+   <N
+?1
+   ≤1000.
+Output Specification:
+For each test case you should output the sum of A and B in one line, with the same format as the input. Notice that there must be NO extra space at the end of each line. Please be accurate to 1 decimal place.
+
+Sample Input:
+2 1 2.4 0 3.2
+2 2 1.5 1 0.5
+   
+Sample Output:
+3 2 1.5 1 2.9 0 3.2
+
+*/
+
+#include<cstdio>
+using namespace std;
+struct node
+{
+    int e;//指数
+    double cof;//系数
+}a[1500],b[1500];
+double ans[2002]={0};
+int main()
+{
+    int m,n,sum=0;
+    scanf("%d",&m);
+    for(int i=0;i<m;i++)
+    {
+        scanf("%d %lf",&a[i].e,&a[i].cof);
+        ans[a[i].e]+=a[i].cof;
+    }
+    scanf("%d",&n);
+    sum=m+n;
+    for(int i=0;i<n;i++)
+    {
+        scanf("%d %lf",&b[i].e,&b[i].cof);
+        ans[b[i].e]+=b[i].cof;  //用ans 数组 相加 
+    }
+    for(int i=0;i<m;i++)
+    {
+        for(int j=0;j<n;j++)
+        {
+            if(a[i].e==b[j].e)
+                sum--;
+            if(a[i].e==b[j].e&&a[i].cof+b[j].cof==0)
+                sum--;
+        }
+    }
+ 
+    printf("%d",sum);
+    for(int i=2000;i>=0;i--)
+    {
+        if(ans[i]!=0)
+            printf(" %d %.1lf",i,ans[i]);
+    }
+ 
+ 
+    return 0;
+}
+
+/*1003 Emergency (25分)
+As an emergency rescue team leader of a city, you are given a special map of your country. The map shows several scattered cities connected by some roads. Amount of rescue teams in each city and the length of each road between any pair of cities are marked on the map. When there is an emergency call to you from some other city, your job is to lead your men to the place as quickly as possible, and at the mean time, call up as many hands on the way as possible.
+
+Input Specification:
+Each input file contains one test case. For each test case, the first line contains 4 positive integers: N (≤500) - the number of cities (and the cities are numbered from 0 to N?1), M - the number of roads, C
+?1
+??  and C
+?2
+??  - the cities that you are currently in and that you must save, respectively. The next line contains N integers, where the i-th integer is the number of rescue teams in the i-th city. Then M lines follow, each describes a road with three integers c
+?1
+?? , c
+?2
+??  and L, which are the pair of cities connected by a road and the length of that road, respectively. It is guaranteed that there exists at least one path from C
+?1
+??  to C
+?2
+?? .
+
+Output Specification:
+For each test case, print in one line two numbers: the number of different shortest paths between C
+?1
+??  and C
+?2
+?? , and the maximum amount of rescue teams you can possibly gather. All the numbers in a line must be separated by exactly one space, and there is no extra space allowed at the end of a line.
+
+Sample Input:
+5 6 0 2
+1 2 1 5 3
+0 1 1
+0 2 2
+0 3 1
+1 2 1
+2 4 1
+3 4 1
+
+      
+    
+Sample Output:
+2 4
+最短路径问题 dijkstra  题意是求 两点之间最短距离  若有相同，输出权值大的 
+*/
+
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+const int MAXV = 510; //顶点数 
+const int INF = 10000000; //无穷大
+//n为顶点数 ，m为边数 st ed 为起点终点 
+//G 为邻接矩阵，weight 为点权值
+//d[]记录最短距离，w[]记录最大点权之和，num[]记录最短路径条数
+int n,m,st,ed;
+int G[MAXV][MAXV],weight[MAXV];
+int d[MAXV],w[MAXV],num[MAXV];
+bool vis[MAXV] = {false}; //表示是否访问该顶点
+
+void Dijkstra(int s){
+	fill(d,d+MAXV,INF);
+	memset(num,0,sizeof(num));
+	memset(w,0,sizeof(w));
+	d[s] =0;
+	w[s] = weight[s];
+	num[s] = 1;
+	for(int i=0;i<n;i++){
+		int u = -1,MIN  = INF;
+		for(int j=0;j<n;j++){
+			if(vis[j] == false && d[j] <MIN){
+				u=j; MIN = d[j];
+			}
+		}
+		//找不到 d[u] 说明剩下不连通
+		if( u==-1)  return ;
+		vis[u] = true;
+		for(int v= 0;v<n;v++){
+			//如果v未访问 且 u能到达v 且 以u为中介可以更短
+			if(vis[v] == false && G[u][v] !=INF){
+				if(d[u] + G[u][v] < d[v]){
+					d[v] = d[u] +G[u][v];
+					w[v] = w[u] +weight[v];
+					num[v] = num[u];
+				}else if(d[u] +G[u][v] == d[v]){
+					if(w[u] +weight[v] > w[v]){
+						w[v] = w[u] +weight[v];
+					}
+					//最短路径和短权无关，
+					num[v] +=num[u]; 
+				}
+				
+			
+			} 
+		} 
+	}
+} 
+int main(){
+	scanf("%d %d %d %d",&n,&m,&st,&ed);
+	for(int i=0;i<n;i++){
+		scanf("%d",&weight[i]);
+	}
+	int u,v,road; // 两点 和 路径 长度 
+	fill(G[0],G[0]+MAXV*MAXV,INF);
+	for(int i=0;i<m;i++){
+		scanf("%d %d %d",&u,&v,&road);
+		G[u][v] = G[v][u] = road;
+	}
+	Dijkstra(st);
+	printf("%d %d\n",num[ed],w[ed]);
+	return 0;
+}
+
+/*  1018 Public Bike Management (30分)
+There is a public bike service in Hangzhou City which provides great convenience to the tourists from all over the world. One may rent a bike at any station and return it to any other stations in the city.
+
+The Public Bike Management Center (PBMC) keeps monitoring the real-time capacity of all the stations. A station is said to be in perfect condition if it is exactly half-full. If a station is full or empty, PBMC will collect or send bikes to adjust the condition of that station to perfect. And more, all the stations on the way will be adjusted as well.
+
+When a problem station is reported, PBMC will always choose the shortest path to reach that station. If there are more than one shortest path, the one that requires the least number of bikes sent from PBMC will be chosen.
+
+
+
+The above figure illustrates an example. The stations are represented by vertices and the roads correspond to the edges. The number on an edge is the time taken to reach one end station from another. The number written inside a vertex S is the current number of bikes stored at S. Given that the maximum capacity of each station is 10. To solve the problem at S
+?3
+?? , we have 2 different shortest paths:
+
+PBMC -> S
+?1
+??  -> S
+?3
+?? . In this case, 4 bikes must be sent from PBMC, because we can collect 1 bike from S
+?1
+??  and then take 5 bikes to S
+?3
+?? , so that both stations will be in perfect conditions.
+
+PBMC -> S
+?2
+??  -> S
+?3
+?? . This path requires the same time as path 1, but only 3 bikes sent from PBMC and hence is the one that will be chosen.
+
+Input Specification:
+Each input file contains one test case. For each case, the first line contains 4 numbers: C
+?max
+??  (≤100), always an even number, is the maximum capacity of each station; N (≤500), the total number of stations; S
+?p
+?? , the index of the problem station (the stations are numbered from 1 to N, and PBMC is represented by the vertex 0); and M, the number of roads. The second line contains N non-negative numbers C
+?i
+??  (i=1,?,N) where each C
+?i
+??  is the current number of bikes at S
+?i
+??  respectively. Then M lines follow, each contains 3 numbers: S
+?i
+?? , S
+?j
+?? , and T
+?ij
+??  which describe the time T
+?ij
+??  taken to move betwen stations S
+?i
+??  and S
+?j
+?? . All the numbers in a line are separated by a space.
+
+Output Specification:
+For each test case, print your results in one line. First output the number of bikes that PBMC must send. Then after one space, output the path in the format: 0?>S
+?1
+?? ?>??>S
+?p
+?? . Finally after another space, output the number of bikes that we must take back to PBMC after the condition of S
+?p
+??  is adjusted to perfect.
+
+Note that if such a path is not unique, output the one that requires minimum number of bikes that we must take back to PBMC. The judge's data guarantee that such a path is unique.
+
+Sample Input:
+10 3 3 5
+6 7 0
+0 1 1
+0 2 1
+0 3 3
+1 3 1
+2 3 1
+
+      
+    
+Sample Output:
+3 0->2->3 0
+*/ 
+#include<cstdio>
+#include<cstring>
+#include<vector>
+#include<algorithm>
+using namespace std;
+const int MAXV = 510;
+const int INF = 1000000000;
+int n, m, Cmax, Sp, numPath = 0,G[MAXV][MAXV], weight[MAXV];
+int d[MAXV],minNeed = INF,minRemain =INF;
+bool vis[MAXV] = {false};
+vector<int> pre[MAXV];
+vector<int> tempPath , path;
+void Dijkstra(int s){
+	fill(d,d+MAXV,INF);
+	d[s] = 0;
+	for(int i=0;i<=n;i++){
+		int u =-1,MIN = INF;
+		for(int j=0;j<=n;j++){
+			if(vis[j] == false && d[j] <MIN){
+				u = j; MIN = d[j];
+			}
+		}
+		if( u == -1) return ;
+		vis[u] = true;
+		for(int v=0;v<=n;v++){
+			if( vis[v] == false && G[u][v] !=INF){
+				if(d[u] + G[u][v] <d[v]){
+					d[v] = d[u] +G[u][v];
+					pre[v].clear();
+					pre[v].push_back(u);
+				}else if( d[u] + G[u][v] == d[v]){
+					pre[v].push_back(u);
+				}
+			}
+		}
+	}
+}
+void DFS(int v){
+	if( v==0){
+		tempPath.push_back(v);
+		int need = 0,remain = 0;
+		for(int i=tempPath.size() -1;i>=0;i--){
+			int id = tempPath[i];
+			if(weight[id] > 0){
+				remain +=weight[id];
+			}else{
+				if(remain >abs(weight[id])){
+					remain -= abs(weight[id]);
+				}else{
+					need +=abs(weight[id]) - remain;
+					remain = 0;
+				}
+			}
+		}
+		if( need < minNeed){
+			minNeed = need;
+			minRemain = remain;
+			path = tempPath;
+		} else if( need = minNeed && remain < minRemain){
+			minRemain = remain;
+			path = tempPath;
+		}
+		tempPath.pop_back();
+		return ;
+		
+	}
+	tempPath.push_back(v);
+	for(int i=0;i<pre[v].size();i++){
+		DFS(pre[v][i]);
+	}
+	tempPath.pop_back();
+}
+int main(){
+	scanf("%d %d %d %d",&Cmax,&n,&Sp,&m);
+	int u,v;
+	fill(G[0],G[0]+MAXV*MAXV,INF);
+	for(int i=1;i<=n;i++){
+		scanf("%d",&weight[i]);
+		weight[i] -= Cmax/2;
+	} 
+	for(int i=0;i<m;i++){
+		scanf("%d %d",&u,&v);
+		scanf("%d",&G[u][v]);
+		G[v][u] = G[u][v];
+	}
+	Dijkstra(0);
+	DFS(Sp);
+	printf("%d ",minNeed);
+	for(int i = path.size()-1;i>=0;i--){
+		printf("%d",path[i]);
+		if( i >0) printf("->");
+	}
+	printf(" %d",minRemain);
+	return 0;
+}
+
+/*
+1013 Battle Over Cities (25分)
+It is vitally important to have all the cities connected by highways in a war. If a city is occupied by the enemy, all the highways from/toward that city are closed. We must know immediately if we need to repair any other highways to keep the rest of the cities connected. Given the map of cities which have all the remaining highways marked, you are supposed to tell the number of highways need to be repaired, quickly.
+
+For example, if we have 3 cities and 2 highways connecting city
+?1
+?? -city
+?2
+??  and city
+?1
+?? -city
+?3
+?? . Then if city
+?1
+??  is occupied by the enemy, we must have 1 highway repaired, that is the highway city
+?2
+?? -city
+?3
+?? .
+
+Input Specification:
+Each input file contains one test case. Each case starts with a line containing 3 numbers N (<1000), M and K, which are the total number of cities, the number of remaining highways, and the number of cities to be checked, respectively. Then M lines follow, each describes a highway by 2 integers, which are the numbers of the cities the highway connects. The cities are numbered from 1 to N. Finally there is a line containing K numbers, which represent the cities we concern.
+
+Output Specification:
+For each of the K cities, output in a line the number of highways need to be repaired if that city is lost.
+
+Sample Input:
+3 2 3
+1 2
+1 3
+1 2 3
+
+      
+    
+Sample Output:
+1
+0
+0
+邻接矩阵 
+#include<algorithm>
+#include<cstdio>
+#include<iostream>
+using namespace std;
+int v[1000][1000];
+bool visit[1001];
+int n;
+void dfs(int node){
+	visit[node] =true;
+	for(int i=1;i<=n;i++){
+		if(visit[i] == false && v[node][i] == 1){
+			dfs(i);
+		}
+	}
+}
+int main(){
+	int m,k,a,b;
+	scanf("%d%d%d",&n,&m,&k);
+	for(int i=0;i<m;i++){
+		scanf("%d%d",&a,&b);
+		v[a][b] = 1;
+		v[b][a] = 1;
+	}
+	for(int i=0;i<k;i++){
+		fill(visit,visit+1001,false);
+		int temp =0;
+		scanf("%d",&temp);
+		visit[temp] = true;
+		int cnt = 0;
+		for(int j=1;j<=n;j++){
+			if(visit[j] == false){
+				dfs(j);
+				cnt++;
+			}
+		}
+		printf("%d\n",cnt-1);
+	}
+	return 0;
+} 
+
+//dfs 邻接表 
+#include<cstdio>
+#include<cstring>
+#include<vector>
+using namespace std;
+const int maxn = 1111;
+vector<int> G[maxn];
+bool vis[maxn];
+
+int currentPoint; //删除的点  
+void dfs(int v){
+	if(v == currentPoint) return;
+	vis[v] = true;
+	for(int i=0;i<G[v].size();i++){
+		if(vis[G[v][i]] ==false){
+			dfs(G[v][i]);
+		} 
+	}
+}
+int n,m,k; //点 边 查询次数 
+int main(){
+	int a,b;
+	scanf("%d %d %d",&n,&m,&k); 
+	for(int i=0;i<m;i++){
+		scanf("%d %d",&a,&b);
+		G[a].push_back(b);
+		G[b].push_back(a);
+		
+	}
+	for(int query = 0;query<k;query++){
+		scanf("%d", &currentPoint);
+		memset(vis,false,sizeof(vis));
+		int ans = 0;
+		for(int i=1;i<=n;i++){
+			if(i != currentPoint && vis[i] == false){
+				dfs(i);
+				ans++;
+			}
+		}
+		printf("%d\n",ans-1);
+	}
+	return 0;
+}
+dfs or 并查集 
+*/
+//并查集
+#include<cstdio>
+#include<vector>
+using namespace std;
+const int maxn = 1111;
+vector<int> G[maxn];
+int father[maxn];
+bool vis[maxn];
+int findfather(int x){
+	int a = x;
+	while( x != father[x]){
+		x= father[x];
+	}
+	//路径压缩
+	while( a != father[a]){
+		int z = a;
+		a = father[a];
+		father[z] = x; 
+	} 
+	return x;
+}
+int Union(int a,int b){
+	int fa = findfather(a);
+	int fb = findfather(b);
+	if( fa != fb){
+		father[fa] = fb;
+	}
+}
+
+void init(){
+	for(int i=0;i<=maxn;i++){
+		father[i] = i;
+		vis[i] = false;
+	}
+}
+
+int n,m,k;
+int main(){
+	scanf("%d %d %d",&n,&m,&k);
+	for(int i=0;i<m;i++){
+		int a,b;
+		scanf("%d %d",&a,&b);
+		G[a].push_back(b);
+		G[b].push_back(a);
+	}
+	int currentPoint;
+	for(int query=0;query<k;query++){
+		scanf("%d",&currentPoint);
+		init();
+		for(int i=1;i<=n;i++){
+			for(int j=0;j<G[i].size();j++){
+				int u = i,v = G[i][j];
+				if(u == currentPoint || v == currentPoint) continue;
+				Union(u, v);
+			}
+		}
+		int block = 0;
+		for(int i=1;i<=n;i++){
+			if( i== currentPoint) continue;
+			int fa_i = findfather(i);
+			if(vis[fa_i] == false){
+				block++;
+				vis[fa_i] = true;
+			}
+		}
+		printf("%d\n",block-1);
+	}
+	return 0;
+}
+
+/*1034 Head of a Gang (30分)
+One way that the police finds the head of a gang is to check people's phone calls. If there is a phone call between A and B, we say that A and B is related. The weight of a relation is defined to be the total time length of all the phone calls made between the two persons. A "Gang" is a cluster of more than 2 persons who are related to each other with total relation weight being greater than a given threshold K. In each gang, the one with maximum total weight is the head. Now given a list of phone calls, you are supposed to find the gangs and the heads.
+
+Input Specification:
+Each input file contains one test case. For each case, the first line contains two positive numbers N and K (both less than or equal to 1000), the number of phone calls and the weight threthold, respectively. Then N lines follow, each in the following format:
+
+Name1 Name2 Time
+
+      
+    
+where Name1 and Name2 are the names of people at the two ends of the call, and Time is the length of the call. A name is a string of three capital letters chosen from A-Z. A time length is a positive integer which is no more than 1000 minutes.
+
+Output Specification:
+For each test case, first print in a line the total number of gangs. Then for each gang, print in a line the name of the head and the total number of the members. It is guaranteed that the head is unique for each gang. The output must be sorted according to the alphabetical order of the names of the heads.
+
+Sample Input 1:
+8 59
+AAA BBB 10
+BBB AAA 20
+AAA CCC 40
+DDD EEE 5
+EEE DDD 70
+FFF GGG 30
+GGG HHH 20
+HHH FFF 10
+
+      
+    
+Sample Output 1:
+2
+AAA 3
+GGG 3
+
+      
+    
+Sample Input 2:
+8 70
+AAA BBB 10
+BBB AAA 20
+AAA CCC 40
+DDD EEE 5
+EEE DDD 70
+FFF GGG 30
+GGG HHH 20
+HHH FFF 10
+
+      
+    
+Sample Output 2:
+0
+
+*/
+/*
+	图论 head of Gang PAT A1034  
+*/
+#include<string>
+#include<map>
+#include<iostream>
+using namespace std;
+const int maxn = 2010; //总人数 
+const int INF = 10000000; //无穷大 
+map<int, string> intToString; //编号 姓名
+map<string,int> stringToInt; //姓名->编号
+map<string, int> Gang; // head-> 人数
+int G[maxn][maxn] = {0}, weight[maxn] ={0};//邻接矩阵G，点权 weight 
+int n,k,numPerson = 0;
+bool vis[maxn] = {false};
+// DFS函数访问单个连通块， nowVisit 为当前访问的编号
+// head 为头目 ，numMember 为成员编号 totalValue 为连通块的总边权
+void DFS(int nowVisit, int& head,int& numMember, int& totalValue){
+	numMember++; //成员人数 加1 
+	vis[nowVisit] = true; //标记nowVist 已访问 
+	if(weight[nowVisit] > weight[head]){
+		head = nowVisit; //当前访问结点的点权大于头目的点权，则更新头目 
+	} 
+	for(int i=0;i<numPerson;i++){ //枚举所有人 
+		if(G[nowVisit][i] > 0){ //如果从nowVist 能到达 i 
+			totalValue += G[nowVisit][i]; //连通块的总边权增加该边权 
+			G[nowVisit][i] = G[i][nowVisit] = 0; //删除这条边，防止回头 
+			if( vis[i] == false){ // 如果i未被访问，则递归访问i 
+				DFS(i,head,numMember,totalValue);
+			} 
+		}
+	}
+} 
+
+void DFSTrave(){
+	for(int i=0;i< numPerson; i++){ //枚举 所有人 
+		if(vis[i] == false){ //如果i未被访问 
+			int head = i,numMember = 0,totalValue = 0;  //头目，成员数，总边权 
+			DFS(i, head, numMember, totalValue); //遍历i所在的连通块 
+			if(numMember > 2 && totalValue > k){ //成员数大于 2且总边权 大于k
+				// head 人数为numMember 
+				Gang[intToString[head]] = numMember;
+			} 
+		}
+	}
+}
+//change 函数 返回 姓名 str 对应的编号
+int change(string str){
+	if(stringToInt.find(str) != stringToInt.end() ){
+		return stringToInt[str]; //返回编号 
+	}else{
+		stringToInt[str] = numPerson; //str编号为numMember 
+		intToString[numPerson] = str; //numPerson 对应 str 
+		return numPerson++;  //总人数 +1 
+	}
+} 
+int main(){
+	int w;//边的权值 
+	string str1,str2; //编号 
+	cin >> n>> k;
+	for(int i=0;i<n;i++){
+		cin >> str1 >> str2 >> w; //输入边的两个端点 和点权 
+		int id1 = change(str1); //将str1转换成id1 
+		int id2 = change(str2);
+		weight[id1] += w; //id1 的点权 增加w 
+		weight[id2] += w; //id2 的点权 增加 w 
+		G[id1][id2] += w;//边id1-> id2 边权增加 w 
+		G[id2][id1] += w;
+		 
+	} 
+	DFSTrave();
+	cout <<Gang.size()<<endl;
+	map<string, int>::iterator it;
+	for(it = Gang.begin();it !=Gang.end();it++){
+		cout<< it->first << " " <<it->second <<endl; 
+	} 
+	return 0;
+}
+
+
+/*1076 Forwards on Weibo (30分)
+Weibo is known as the Chinese version of Twitter. One user on Weibo may have many followers, and may follow many other users as well. Hence a social network is formed with followers relations. When a user makes a post on Weibo, all his/her followers can view and forward his/her post, which can then be forwarded again by their followers. Now given a social network, you are supposed to calculate the maximum potential amount of forwards for any specific user, assuming that only L levels of indirect followers are counted.
+Input Specification:
+Each input file contains one test case. For each case, the first line contains 2 positive integers: N (≤1000), the number of users; and L (≤6), the number of levels of indirect followers that are counted. Hence it is assumed that all the users are numbered from 1 to N. Then N lines follow, each in the format:
+
+M[i] user_list[i]
+  
+where M[i] (≤100) is the total number of people that user[i] follows; and user_list[i] is a list of the M[i] users that followed by user[i]. It is guaranteed that no one can follow oneself. All the numbers are separated by a space.
+
+Then finally a positive K is given, followed by K UserID's for query.
+
+Output Specification:
+For each UserID, you are supposed to print in one line the maximum potential amount of forwards this user can trigger, assuming that everyone who can view the initial post will forward it once, and that only L levels of indirect followers are counted.
+
+Sample Input:
+7 3
+3 2 3 4
+0
+2 5 6
+2 3 1
+2 3 4
+1 4
+1 5
+2 2 6
+Sample Output:
+4
+5
+
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<vector>
+#include<queue>
+using namespace std;
+const int MAXV  = 1010;
+struct node{
+	int id;
+	int layer;
+}; 
+vector<node> Adj[MAXV];
+bool inq[MAXV] = {false};
+
+int BFS(int s,int L){
+	int numForward = 0;
+	queue<node> q;
+	node start;
+	start.id = s;
+	start.layer = 0;
+	q.push(start);
+	inq[start.id] = true;
+	while( !q.empty()){
+		node topNode = q.front();
+		q.pop();
+		int u = topNode.id;
+		for(int i=0;i<Adj[u].size();i++){
+			node next = Adj[u][i];
+			next.layer = topNode.layer +1;
+			if( inq[next.id] == false && next.layer <=L){
+				q.push(next);
+				inq[next.id] = true;
+				numForward++;
+			} 
+		} 
+	}
+	return numForward;
+} 
+
+int main(){
+	node user;
+	int n,L,numFollow,idFollow;
+	scanf("%d %d",&n,&L);
+	for(int i=1;i<=n;i++){
+		user.id = i;
+		scanf("%d",&numFollow);
+		for(int j=0;j<numFollow;j++){
+			scanf("%d",&idFollow);
+			Adj[idFollow].push_back(user);
+		}
+	}
+	int numQuery,s;
+	scanf("%d",&numQuery);
+	for(int i=0;i<numQuery;i++){
+		memset(inq,false,sizeof(inq));
+		scanf("%d",&s);
+		int numForward = BFS(s,L);
+		printf("%d\n",numForward);
+	}
+	return 0;
+}
+
+
+*/
+
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <vector>
+using namespace std;
+const int maxn=1010;
+vector<int> adj[maxn];
+int n,L,amount[maxn],num;
+bool flag[maxn];
+void DFS(int s,int level)
+{
+	if(level>=L)
+		return ;
+	for(int i=0;i<adj[s].size();++i)
+	{
+		if(flag[adj[s][i]]==false)
+		{
+			++num;
+			flag[adj[s][i]]=true;
+		}
+		DFS(adj[s][i],level+1);
+	}
+}
+ 
+int main()
+{
+	int m,k,t;
+	memset(amount,-1,sizeof(amount));
+	scanf("%d%d",&n,&L);
+	for(int i=1;i<=n;++i)
+	{
+		scanf("%d",&m);
+		for(int j=0;j<m;++j)
+		{
+			scanf("%d",&t);
+			adj[t].push_back(i);
+		}
+	}
+	scanf("%d",&k);
+	for(int i=0;i<k;++i)
+	{
+		scanf("%d",&t);
+		if(amount[t]!=-1)
+			printf("%d\n",amount[t]);
+		else
+		{
+			memset(flag,0,sizeof(flag));
+			num=0;
+			flag[t]=true;
+			DFS(t,0);
+			amount[t]=num;
+			printf("%d\n",num);
+		}
+	}
+	return 0;
+}
+
+/*
+pat A1030 Travel Plan (30分)
+A traveler's map gives the distances between cities along the highways, together with the cost of each highway. Now you are supposed to write a program to help a traveler to decide the shortest path between his/her starting city and the destination. If such a shortest path is not unique, you are supposed to output the one with the minimum cost, which is guaranteed to be unique.
+
+Input Specification:
+Each input file contains one test case. Each case starts with a line containing 4 positive integers N, M, S, and D, where N (≤500) is the number of cities (and hence the cities are numbered from 0 to N?1); M is the number of highways; S and D are the starting and the destination cities, respectively. Then M lines follow, each provides the information of a highway, in the format:
+
+City1 City2 Distance Cost
+
+      
+    
+where the numbers are all integers no more than 500, and are separated by a space.
+
+Output Specification:
+For each test case, print in one line the cities along the shortest path from the starting point to the destination, followed by the total distance and the total cost of the path. The numbers must be separated by a space and there must be no extra space at the end of output.
+
+Sample Input:
+4 5 0 3
+0 1 1 20
+1 3 2 30
+0 3 4 10
+0 2 2 20
+2 3 1 20
+
+      
+    
+Sample Output:
+0 2 3 3 40
+
+
+
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+const int MAXV = 510;
+const int INF = 10000000;
+int n,m,st,ed,G[MAXV][MAXV],cost[MAXV][MAXV];
+int d[MAXV],c[MAXV],pre[MAXV];
+bool vis[MAXV] = {false};
+void Dijkstra(int s){
+	fill(d,d+MAXV,INF);
+	fill(c,c+MAXV,INF);
+	for(int i=0;i<n;i++){
+		pre[i] = i;
+	}
+	d[s]=0;
+	c[s]=0;
+	for(int i=0;i<n;i++){
+		int u = -1,MIN = INF;
+		for(int j=0;j<n;j++){
+			if(vis[j] == false && d[j]<MIN){
+				u=j;
+				MIN = d[j];
+			}
+		}
+		if(u==-1) return ;
+		vis[u] = true;
+		for(int v= 0;v<n;v++){
+			if(vis[v] == false &&G[u][v] !=INF){
+				if(d[u] +G[u][v] <d[v]){
+					d[v] = d[u] +G[u][v];
+					c[v] = c[u] +cost[u][v];
+					pre[v]=u;
+				}else if(d[u] + G[u][v] == d[v]){
+					if(c[v] > c[u] +cost[u][v]){
+						c[v] = c[u]+cost[u][v];
+						pre[v] = u;
+					}
+				}
+			}
+		}
+	}
+}
+void DFS(int v){
+	if( v ==st){
+		printf("%d ",v);
+		return ; 
+	} 
+	DFS(pre[v]);
+	printf("%d ",v);
+}
+int main(){
+	scanf("%d %d %d %d",&n,&m,&st,&ed);
+	int u,v;
+	fill(G[0],G[0]+MAXV*MAXV,INF);
+	for(int i=0;i<m;i++){
+		scanf("%d %d",&u,&v);
+		scanf("%d %d",&G[u][v],&cost[u][v]);
+		G[v][u] = G[u][v];
+		cost[v][u] = cost[u][v];
+	}
+	Dijkstra(st);
+	DFS(ed);
+	printf("%d %d\n",d[ed],c[ed]);
+	return 0;
+}
+*/
+#include<cstdio>
+#include<cstring>
+#include<vector>
+#include<algorithm>
+using namespace std;
+const int MAXV = 510;
+const int INF = 100000000;
+int n,m,st,ed,G[MAXV][MAXV],cost[MAXV][MAXV];
+int d[MAXV],minCost = INF;
+bool vis[MAXV] ={false};
+vector<int> pre[MAXV];
+vector<int> tempPath,path;
+
+void Dijkstra(int s){
+	fill(d,d+MAXV,INF);
+	d[s] = 0;
+	for(int i=0;i<n;i++){
+		int u=-1,MIN = INF;
+		for(int j=0;j<n;j++){
+			if(vis[j] == false && d[j] <MIN){
+				u=j;MIN=d[j];
+			}
+		}
+		if(u == -1) return ;
+		vis[u] = true;
+		for(int v=0;v<n;v++){
+			if(vis[v] == false && G[u][v] != INF){
+				if(d[u] +G[u][v] <d[v]){
+					d[v] =d[u] +G[u][v];
+					pre[v].clear();
+					pre[v].push_back(u);
+				}else if( d[u] +G[u][v] ==d[v]){
+					pre[v].push_back(u);
+				}
+			}
+		}
+	}
+}
+void DFS(int v){
+	if(v ==st){
+		tempPath.push_back(v);
+		int tempCost = 0;
+		for(int i=tempPath.size()-1;i>0;i--){
+			int id = tempPath[i],idNext = tempPath[i-1];
+			tempCost +=cost[id][idNext];
+		}
+		if(tempCost < minCost){
+			minCost = tempCost;
+			path = tempPath;
+		}
+		tempPath.pop_back();
+		return ;
+	}
+	tempPath.push_back(v);
+	for(int i=0;i<pre[v].size();i++){
+		DFS(pre[v][i]);
+	}
+	tempPath.pop_back();
+}
+int main(){
+	scanf("%d %d %d %d",&n,&m,&st,&ed);
+	int u,v;
+	fill(G[0],G[0]+MAXV*MAXV,INF);
+	fill(cost[0],cost[0]+MAXV*MAXV,INF); 
+	for(int i=0;i<m;i++){
+		scanf("%d %d",&u,&v);
+		scanf("%d %d",&G[u][v],&cost[u][v]);
+		G[v][u] = G[u][v];
+		cost[v][u] = cost[u][v];
+	}
+	Dijkstra(st);
+	DFS(ed);
+	for(int i=path.size()-1;i>=0;i--){
+		printf("%d ",path[i]);
+	}
+	printf("%d %d\n",d[ed],minCost);
+	return 0;
+}
+
+
+/*
+1072 Gas Station (30分)
+A gas station has to be built at such a location that the minimum distance between the station and any of the residential housing is as far away as possible. However it must guarantee that all the houses are in its service range.
+
+Now given the map of the city and several candidate locations for the gas station, you are supposed to give the best recommendation. If there are more than one solution, output the one with the smallest average distance to all the houses. If such a solution is still not unique, output the one with the smallest index number.
+
+Input Specification:
+Each input file contains one test case. For each case, the first line contains 4 positive integers: N (≤10
+?3
+?? ), the total number of houses; M (≤10), the total number of the candidate locations for the gas stations; K (≤10
+?4
+?? ), the number of roads connecting the houses and the gas stations; and D
+?S
+?? , the maximum service range of the gas station. It is hence assumed that all the houses are numbered from 1 to N, and all the candidate locations are numbered from G1 to GM.
+
+Then K lines follow, each describes a road in the format
+
+P1 P2 Dist
+
+      
+    
+where P1 and P2 are the two ends of a road which can be either house numbers or gas station numbers, and Dist is the integer length of the road.
+
+Output Specification:
+For each test case, print in the first line the index number of the best location. In the next line, print the minimum and the average distances between the solution and all the houses. The numbers in a line must be separated by a space and be accurate up to 1 decimal place. If the solution does not exist, simply output No Solution.
+
+Sample Input 1:
+4 3 11 5
+1 2 2
+1 4 2
+1 G1 4
+1 G2 3
+2 3 2
+2 G2 1
+3 4 2
+3 G3 2
+4 G1 3
+G2 G1 1
+G3 G2 2
+
+      
+    
+Sample Output 1:
+G1
+2.0 3.3
+
+      
+    
+Sample Input 2:
+2 1 2 10
+1 G1 9
+2 G1 20
+
+      
+    
+Sample Output 2:
+No Solution
+*/
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+const int MAXV = 1020;
+const int INF = 1000000000;
+int n,m,k,DS,G[MAXV][MAXV];//n为顶点数，m为加油站数，k为边数DS为服务范围g为邻接矩阵 
+int d[MAXV]; //记录最短距离 
+bool vis[MAXV] = {false};
+void Dijkstra(int s){
+	memset(vis,false,sizeof(vis));
+	fill(d,d+MAXV,INF);
+	d[s] = 0;
+	for(int i=0;i<n+m;i++){
+		int u = -1,MIN = INF; //u使d[u]最小，MIN存放该最小的d[u] 
+		for(int j=1;j<=n +m;j++){ //找到未访问的定点中d[]最小的 
+			if(vis[j] == false && d[j] <MIN){
+				u=j;MIN = d[j];
+			}
+		}
+		if(u==-1) return ;
+		vis[u] = true;
+		for(int v= 1;v<=n+m;v++){
+			if(vis[v] == false && G[u][v] !=INF){
+				if(d[u] +G[u][v] <d[v]){
+					d[v] = d[u]+G[u][v];
+				}
+			}
+		}
+	}
+}
+//将str转化成数字，若str是数字则放回本身，否则返回去掉G之后的数加上n 
+int getID(char str[]){
+	int i=0,len = strlen(str),ID = 0;
+	while( i< len){
+		if(str[i] !='G'){ //不是g 就 转化成数字 
+			ID = ID *10 +(str[i] - '0');
+		}
+		i++;
+	}
+	if(str[0] == 'G') return n+ID; //首位是g 返回n+ID 
+	else return ID;
+}
+int main(){
+	scanf("%d %d %d %d",&n,&m,&k,&DS);
+	int u,v,w;
+	char city1[5],city2[5];
+	fill(G[0],G[0]+MAXV*MAXV,INF);
+	for(int i=0;i<k;i++){
+		scanf("%s %s %d",&city1,&city2,&w);
+		u=getID(city1);
+		v=getID(city2);
+		G[v][u] = G[u][v] = w;
+	} 
+	//ansDis 存放使最大的最短距离
+	//ansAvg存放最小平均距离，ansID存放最终加油站ID
+	double ansDis = -1,ansAvg = INF;
+	int ansID = -1;
+	for(int i=n+1;i<=n+m;i++){ //枚举所有加油站 
+		double minDis = INF,avg = 0;  //minDis位最大的最近距离，avg为平均距离 
+		Dijkstra(i);
+		for(int j=1;j<=n;j++){ 
+			if(d[j] >DS){ //存在距离大于ds 的房子 直接跳出 
+			minDis = -1; break;
+			}
+			if(d[j] < minDis) minDis =d[j]; //更新最大的最近距离· 
+			avg +=1.0*d[j]/n;  //获取平均距离 
+		} 
+		if(minDis == -1) continue;
+		if(minDis >ansDis){
+			ansID = i;
+			ansDis = minDis;
+			ansAvg = avg;
+		}else if(minDis == ansDis && avg<ansAvg){  //更新最小平均距离 
+			ansID = i;
+			ansAvg = avg;
+		}
+	} 
+	if(ansID == -1) printf("No Solution\n");
+	else {
+		printf("G%d\n",ansID -n);
+		printf("%.1f %.1f\n",ansDis,ansAvg);
+	}
+	return 0;
+}
+
+/*
+返回
+1087 All Roads Lead to Rome (30分)
+Indeed there are many different tourist routes from our city to Rome. You are supposed to find your clients the route with the least cost while gaining the most happiness.
+
+Input Specification:
+Each input file contains one test case. For each case, the first line contains 2 positive integers N (2≤N≤200), the number of cities, and K, the total number of routes between pairs of cities; followed by the name of the starting city. The next N?1 lines each gives the name of a city and an integer that represents the happiness one can gain from that city, except the starting city. Then K lines follow, each describes a route between two cities in the format City1 City2 Cost. Here the name of a city is a string of 3 capital English letters, and the destination is always ROM which represents Rome.
+
+Output Specification:
+For each test case, we are supposed to find the route with the least cost. If such a route is not unique, the one with the maximum happiness will be recommanded. If such a route is still not unique, then we output the one with the maximum average happiness -- it is guaranteed by the judge that such a solution exists and is unique.
+
+Hence in the first line of output, you must print 4 numbers: the number of different routes with the least cost, the cost, the happiness, and the average happiness (take the integer part only) of the recommanded route. Then in the next line, you are supposed to print the route in the format City1->City2->...->ROM.
+
+Sample Input:
+6 7 HZH
+ROM 100
+PKN 40
+GDN 55
+PRS 95
+BLN 80
+ROM GDN 1
+BLN ROM 1
+HZH PKN 1
+PRS ROM 2
+BLN HZH 2
+PKN GDN 1
+HZH PRS 1
+
+      
+    
+Sample Output:
+3 3 195 97
+HZH->PRS->ROM
+
+*/ 
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<vector>
+#include<map>
+#include<string>
+#include<algorithm>
+using namespace std;
+const int MAXV = 210;
+const int INF = 100000000;
+int n,m,st,G[MAXV][MAXV],weight[MAXV];
+int d[MAXV],numpath = 0,maxw = 0;
+double maxavg = 0;
+bool vis[MAXV] ={false};
+vector<int> pre[MAXV];
+vector<int> temppath,path;
+map<string, int> citytoindex;
+map<int, string> indextocity;
+
+void Dijkstra(int s){
+	fill(d,d+MAXV, INF);
+	d[s] = 0;
+	for(int i=0;i<n;i++){
+		int u =-1,MIN = INF;
+		for(int j=0;j<n;j++){
+			if( vis[j] == false && d[j]<MIN){
+				u=j,MIN = d[j];
+			}
+		}
+		if( u==-1) return ;
+		vis[u] = true;
+		for(int v=0;v<n;v++){
+			if(vis[v] == false &&G[u][v] !=INF){
+				if(d[u] +G[u][v] <d[v]){
+					d[v] =d[u] +G[u][v];
+					pre[v].clear();
+					pre[v].push_back(u);
+				}else if(d[u] +G[u][v] ==d[v] ){
+					pre[v].push_back(u);
+				}
+			}
+		}
+	}
+} 
+
+void DFS(int v){
+	if(v == st){
+		temppath.push_back(v);
+		numpath++;
+		int tempw= 0;
+		for(int i=temppath.size() - 2;i>=0;i--){
+			int id = temppath[i];
+			tempw +=weight[id];
+		}
+		double tempavg = 1.0 *tempw /( temppath.size() -1);
+		if(tempw >maxw){
+			maxw = tempw;
+			maxavg = tempavg;
+			path = temppath; 
+		}else if( tempw  == maxw && tempavg > maxavg){
+			maxavg = tempavg;
+			path = temppath;
+		} 
+		temppath.pop_back();
+		return;
+	}
+	temppath.push_back(v);
+	for(int i=0;i<pre[v].size();i++){
+		DFS(pre[v][i]); 
+	}
+	temppath.pop_back();
+	
+}
+int main(){
+	string start,city1,city2;
+	cin >> n >> m >>start;
+	citytoindex[start] = 0;
+	indextocity[0] = start;
+	for(int i=1;i<=n-1;i++){
+		cin >> city1 >> weight[i];
+		citytoindex[city1] = i;
+		indextocity[i] = city1;
+		
+	}
+	fill(G[0],G[0] +MAXV*MAXV,INF);
+	for(int i=0;i<m;i++){
+		cin >> city1 >> city2;
+		int c1 = citytoindex[city1];
+		int c2 = citytoindex[city2];
+		cin >> G[c1][c2];
+		G[c2][c1] = G[c1][c2];
+	}
+
+	Dijkstra(0);
+	int rom = citytoindex["ROM"];
+	DFS(rom);
+	printf("%d %d %d %d\n",numpath,d[rom],maxw,(int)maxavg);
+	for(int i=path.size() - 1;i>=0;i--){
+		cout << indextocity[path[i]];
+		if( i>0) cout << "->";
+	} 
+	
+	return 0;
+}
