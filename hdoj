@@ -90,3 +90,61 @@ int main(){
 	
 	return 0;
 } 
+
+
+poj  3461
+#include<cstdio>
+#include<iostream>
+#include<string>
+using namespace std;
+const int maxn = 10010;
+int nextTable[maxn];
+
+void getNextTable(string pattern){
+	int m= pattern.size();
+	int j=0;
+	nextTable[j] = -1;
+	int t = nextTable[j];
+	while(j <m){
+		if(t == -1 || pattern[t] == pattern[j]){
+			++t;++j;
+			nextTable[j] = t;
+		}else{
+			t = nextTable[t];
+		}
+	}
+	return ;
+} 
+int KMP(string text,string pattern){
+	getNextTable(pattern);
+	int n=text.size();
+	int m=pattern.size();
+	int i=0;//主串 
+	int j=0;//匹配的串 
+	int num=0;
+	while(i<n){
+		if(j==-1 || text[i] == pattern[j]){
+			++i;++j;
+		}else{
+			j=nextTable[j];
+		}
+	}
+	if(j == m){
+		num++;
+		j=nextTable[j]; //允许字符重复匹配 
+		//j=0;	//不允许重复匹配 
+	}
+	return num;
+}
+int main(){
+	int casenum;
+	scanf("%d",&casenum);
+	while(casenum--){
+		string text,pattern;
+		cin>>pattern>>text;
+		int pos = KMP(text,pattern);
+		printf("%d\n",pos);
+	}
+	
+	return 0;
+} 
