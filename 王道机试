@@ -164,3 +164,573 @@ int main(){
 	printf("%.2f\n",data.top());
 	return 0;
 }
+/*二进制数
+每行有一个数字n 输出求得的二进制数 
+
+#include<cstdio>
+#include<vector>
+using namespace std;
+void convert(int n){
+	vector<int> ans;
+	while(n !=0){
+		ans.push_back(n%2);
+		n/=2;
+	}
+	for(int i=ans.size()-1;i>=0;i--){
+		printf("%d",ans[i]);
+	}
+	printf("\n");
+}
+int main(){
+	int n;
+	while(scanf("%d",&n) !=EOF){
+		convert(n);
+	}
+	return 0;
+}
+
+M 进制转化成 N 进制 
+
+#include<cstdio>
+#include<vector>
+#include<iostream>
+#include<string>
+using namespace std;
+int chartoint(char tag){
+	if('0' <= tag && tag <= '9'){
+		return tag -'0';
+	}else{
+		return tag-'A'+10;
+	}
+}
+int convert(string str,int x){
+	int num=0;
+	for(int i=0;i<str.size();i++){
+		num*=x;
+		num +=chartoint(str[i]);
+	}
+	return num;
+}
+void converttoN(int num,int n){
+	vector<int> ans;
+	while(num !=0){
+		ans.push_back(num % n);
+		num/=n;
+	}
+	for(int i=ans.size()-1;i>=0;i--){
+		printf("%d",ans[i]);
+	} 
+	printf("\n");
+}
+int main(){
+	string str;
+	int m,n;
+	while(cin>>str>>m){
+		scanf("%d",&n);
+		int num = convert(str,m);
+		converttoN(num,n);
+	}
+} 
+  GCD 最小公因数 gcd（a,b)
+  最小公倍数 a*b/gcd(a,b) 
+ 
+ #include<cstdio>
+ using namespace std;
+ int gcd(int a,int b){
+ 	if(b==0){
+ 		return a;
+ 	}else{
+ 		return gcd(b,a%b);
+ 	}
+ } 
+ int main(){
+ 	int a,b;
+ 	while(scanf("%d %d",&a,&b) !=EOF){
+ 		printf("%d\n",gcd(a,b));
+ 	}
+ 	return 0;
+ } 
+ 
+ 判断素数 
+ #include<cstdio>
+ #include<cmath>
+ using namespace std;
+ bool prime(int n){
+ 	if(n <2){
+ 		return false;
+ 	}
+ 	int s=sqrt(n);
+ 	for(int i=2;i<=s;i++){
+ 		if(n %i==0){
+ 			return false;
+ 		}
+ 	}
+ 	return true;
+ }
+ int main(){
+ 	int n;
+ 	while(scanf("%d",&n) !=EOF){
+ 		if(prime(n)){
+ 			printf("YES\n");
+ 		}else{
+ 			printf("No\n");
+ 		}
+ 	}
+ 	
+ 	return 0;
+ } 
+
+#include<cstdio>
+#include<vector>
+using namespace std;
+const int maxn = 1e5;
+vector<int> prime;
+bool isprime[maxn];
+void init(){
+	for(int i=0;i<maxn;i++){
+		isprime[i]=true;
+	}
+	isprime[0]=false;
+	isprime[1]=false;
+	for(int i=2;i<maxn;i++){
+		if( !isprime[i]){
+			continue;
+		}
+		
+		prime.push_back(i);
+		for(int j=i*i;j<maxn;j+=i){
+			isprime[j]=false;
+		}	
+	}
+	return;
+}
+int main(){
+	init();
+	int k;
+	while(scanf("%d",&k) !=EOF){
+		printf("%d\n",prime[k-1]);
+	}
+	return 0;
+}
+
+
+快速幂 
+
+ 
+ #include<cstdio>
+ using namespace std;
+ int quick(int x,int n){
+ 	int ans = 1;
+ 	while(n !=0){
+ 		if(n%2 ==1){
+ 			ans *=x;
+ 			ans%=1000;
+ 		}
+ 		n/=2;
+ 		x*=x;
+ 		x=x%1000;
+ 	}
+ 	return ans;
+ }
+ int main(){
+ 	int a,b;
+ 	while( scanf("%d %d",&a,&b)!=EOF && a+b){
+ 		a=a%1000;
+ 		b=b%1000;
+ 		printf("%d\n",quick(a,b));
+ 	}
+ 	return 0;
+ } 
+ 
+
+  
+#include<cstdio>
+#include<iostream>
+using namespace std;
+const int MAXN = 100;
+struct Matrix{
+	int row,col;
+	int matrix[MAXN][MAXN];
+	Matrix(){}
+	Matrix(int r,int c): row(r),col(c){}
+}; 
+Matrix Add(Matrix x,Matrix y){
+	Matrix ans = Matrix(x.row,x.col);
+	for(int i=0;i<ans.row;i++){
+		for(int j=0;j<ans.col;j++){
+			ans.matrix[i][j] = x.matrix[i][j] + y.matrix[i][j];
+		} 
+	}
+	return ans;
+}
+Matrix Multiply(Matrix x,Matrix y){
+	Matrix ans = Matrix(x.row,y.col);
+	for(int i=0;i<ans.row;i++){
+		for(int j=0;j<ans.col;j++){
+			ans.matrix[i][j] = 0;
+			for(int k=0;k<x.col;k++){
+				ans.matrix[i][j] +=x.matrix[i][k] * y.matrix[k][j];
+			}
+		}
+	}
+	return ans;
+}
+
+Matrix Transpose(Matrix x){
+	Matrix ans = Matrix(x.col,x.row);
+	for(int i=0;i<x.row;i++){
+		for(int j=0;j<x.col;j++){
+			ans.matrix[i][j] = x.matrix[j][i];
+		}
+	}
+	return ans;
+}
+//矩阵求幂 
+Matrix QuickPower(Matrix x,int n){
+	Matrix ans = Matrix(x.row,x.col);
+	for(int i=0;i<ans.row;i++){
+		for(int j=0;j<ans.col;j++){
+			if(i==j){
+				ans.matrix[i][j]=1;
+			}else{
+				ans.matrix[i][j]=0;
+			}
+		} 
+	}
+	while(n !=0){
+		if(n%2==1){
+			ans = Multiply(ans, x);
+		}
+		n/=2;
+		x=Multiply(x,x); 
+	}
+	return ans;
+}
+
+void InputMatrix(Matrix& x){
+	for(int i=0;i<x.row;i++){
+		for(int j=0;j<x.col;j++){
+			scanf("%d",&x.matrix[i][j]);
+		}
+	}
+	return;
+}
+void OutputMatrix(Matrix& x){
+	for(int i=0;i<x.row;i++){
+		for(int j=0;j<x.col;j++){
+			printf(j==0 ? "%d":" %d",x.matrix[i][j]);
+		}
+		printf("\n");
+	}
+	return;
+}
+
+int main(){
+	Matrix x(2,3);
+	Matrix y(3,2);
+	InputMatrix(x);
+	InputMatrix(y);
+	Matrix ans = Multiply(x,y);
+	OutputMatrix(ans); 
+	Transpose(ans);
+	OutputMatrix(ans); 
+
+	int n,k;
+	while( scanf("%d %d",&n,&k) !=EOF){
+		Matrix x = Matrix(n,n);
+		InputMatrix(x);
+		Matrix ans = QuickPower(x,k);
+		OutputMatrix(ans);
+	}	
+	return 0;
+}
+1009 hdoj
+#include<cstdio>
+#include<iostream>
+#include<algorithm>
+using namespace std;
+const int MAXN = 1000;
+struct node{
+	double weight;
+	double cost;
+}a[MAXN];
+bool cmp(node a,node b){
+	return (a.weight/a.cost) > (b.weight/b.cost);
+}
+int main(){
+	int m,n;
+	while(scanf("%d %d",&m,&n) !=EOF){
+		
+		if(m==-1 && n==-1) break;
+		for(int i=0;i<n;i++){
+			scanf("%lf %lf",&a[i].weight,&a[i].cost);
+		}
+		sort(a,a+n,cmp);
+		double res = 0;
+		for(int i=0;i<n;i++){
+			if(m >= a[i].cost){
+				m -=a[i].cost;
+				res +=a[i].weight;
+			}else{
+				res +=m*(a[i].weight/a[i].cost);
+				break;
+			}
+		}
+		printf("%.3lf\n",res);
+	}
+	return 0;
+} 
+
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int MAXN=100010;
+long long a[MAXN],b[MAXN];
+bool cmp(long long x,long long y){
+	return x>y;
+}
+int main(){
+	int temp,n,m;
+	scanf("%d",&temp);
+	while(temp--){
+		
+		scanf("%d %d",&n,&m);
+		for(int i=0;i<n;i++){
+			scanf("%lld",&a[i]);
+		}
+		for(int i=0;i<m;i++){
+			scanf("%lld",&b[i]);
+		}
+		sort(a,a+n,cmp);
+		sort(b,b+m);
+		long long ans =0;
+		for(int i=0;i<n;i++){
+			if(i >= m || a[i]<=b[i]){
+				break;
+			}else{
+				ans +=a[i]-b[i];
+			}
+		}
+	printf("%lld\n",ans);
+	} 
+	return 0;
+}
+
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int MAXN = 10010;
+int a[MAXN];
+int main(){
+	int n,l;
+	scanf("%d %d",&n,&l);
+	for(int i=0;i<n;i++){
+		scanf("%d",&a[i]);
+	}
+	sort(a,a+n);
+	int res =0;
+	int left =0,right=n-1;
+	while(left <=right){
+		if(a[left] +a[right] <=l){
+			res++;
+			left++,right--;
+		}else{
+			right--;
+			res++;
+		}
+	}
+	printf("%d\n",res);
+	return 0;
+}
+
+  //二分策略 贪心 寻找 最小间距最大值
+  //pking 2456  n个位置 m头牛 使 牛之间距离最大 问题  
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int MAXN = 100010;
+int a[MAXN];
+bool judge(int n,int m,int dis){
+	int cur = a[0];
+	int num=1;
+	for(int i=1;i<n;i++){
+		if(a[i]-cur >=dis){
+			num++;
+			cur = a[i];
+		} 
+		if(num >=m){
+			return true;
+		}
+	}
+	return false;
+} 
+int main(){
+	int n,m;//n 个位置 m头牛 
+	while(scanf("%d %d",&n,&m) !=EOF){
+		for(int i=0;i<n;i++){
+			scanf("%d",&a[i]);
+		}
+		sort(a,a+n);
+		int left = 1;
+		int right = a[n-1]-a[0];
+		while(left <= right){
+			int mid = left+(right-left)/2;
+			if(judge(n,m,mid)){
+				left = mid +1;
+			}else{
+				right = mid-1;
+			}
+		}
+		printf("%d\n",left-1);
+	}
+	return 0;
+}
+   
+// poj 3104 n件衣服需要烘干  用烘干机 每分钟减少k 不用每分钟减少1
+//求 都为 0的 最小时间 
+sample input #1
+3
+2 3 9
+5
+sample output #1
+3 
+#include<cstdio>
+#include<algorithm>
+#include<cmath>
+using namespace std;
+const int MAXN = 10010;
+int a[MAXN];
+bool judge(int n,int k,int t){
+	int num=0;
+	for(int i=0;i<n;i++){
+		if(a[i] >t){
+			num +=ceil( (a[i]-t) * 1.0/(k-1));
+		} 
+		if(num >t){
+			return false;
+		}
+	}
+	return true;
+}
+int main(){
+	int n,k;
+	scanf("%d",&n);
+	for(int i=0;i<n;i++){
+		scanf("%d",&a[i]);
+	}
+	sort(a,a+n);
+	scanf("%d",&k);
+	if(k == 1){
+		printf("%d\n",a[n-1]);
+	}else{
+		int left= 1;
+		int right = a[n-1];
+		while(left <= right){
+			int mid = left +(right +left)/2;
+			if(judge(n,k,mid)){
+				right = mid-1;
+			}else{
+				left = mid+1;
+			} 
+		}
+		printf("%d\n",left);
+	}
+	return 0;
+} 
+
+区间贪心  杭电oj 今年暑假不ac 
+
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int MAXN = 100010;
+struct node{
+	int left,right;
+}a[MAXN];
+bool cmp(node a,node b){
+	return a.right <b.right;
+}
+int main(){
+	int n;
+	while(scanf("%d",&n) !=EOF && n){
+		for(int i=0;i<n;i++){
+			scanf("%d %d",&a[i].left,&a[i].right);
+		}
+		sort(a,a+n,cmp);
+		int ans =1;
+		int cur = a[0].right;
+		for(int i=1;i<n;i++){
+			if(a[i].left >=cur){
+				ans++;
+				cur=a[i].right;
+			}
+		} 
+		printf("%d\n",ans);
+	}
+	return 0;
+}
+
+poj  1328 
+Sample Input
+
+3 2
+1 2
+-3 1
+2 1
+
+1 2
+0 2
+
+0 0
+Sample Output
+
+Case 1: 2
+Case 2: 1
+*/ 
+#include<cstdio>
+#include<algorithm>
+#include<cmath> 
+using namespace std;
+const int MAXN=100010;
+struct node{
+	double left;
+	double right;
+}a[MAXN]; 
+bool cmp(node a,node b){
+	return a.left < b.left; 
+}
+int main(){
+	int n,d;
+	while(scanf("%d %d",&n,&d) !=EOF){
+		if(n==0 && d==0) break;
+		int t=0;
+		bool flag = true;
+		for(int i=0;i<n;i++){
+			int x,y;
+			scanf("%d %d",&x,&y);
+			if(y>d){
+				flag = false;
+			}else{
+				a[i].left = x-sqrt(d*d -1.0*y*y);
+				a[i].right = x+sqrt(d*d -1.0*y*y);
+			}
+		}
+		if(!flag){
+			printf("Case %d: %d\n",++t,-1);
+		}else{
+			sort(a,a+n,cmp);
+			double cur = a[0].right;
+			int ans = 1;
+			for(int i=1;i<n;i++){
+				if(a[i].left <= cur){
+					cur = min(cur,a[i].right);
+				}else{
+					cur = a[i].right;
+					ans++;
+				}
+			}
+			printf("Case %d: %d\n",++t,ans);
+		}
+	}
+	return 0;
+} 
